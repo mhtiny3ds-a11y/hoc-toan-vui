@@ -709,4 +709,9 @@ window.addEventListener('popstate', () => { if (UI.sheet) { UI.sheet = null; ren
 /* ---------------- khởi động ---------------- */
 load(); pickVoice(); try { speechSynthesis.onvoiceschanged = pickVoice; } catch (e) { }
 render();
-if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { });
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  // luôn kiểm tra bản mới; khi có bản mới thì tải lại trang một lần
+  const hadCtl = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => { });
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadCtl && !window.__reloaded) { window.__reloaded = true; location.reload(); } });
+}
