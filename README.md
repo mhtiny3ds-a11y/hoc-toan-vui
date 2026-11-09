@@ -23,16 +23,19 @@ Web app học toán tư duy **miễn phí** cho bé, đi theo đúng thứ tự 
 | 5 | 🗼 Tháp Trăm Nghìn | 5 | Số 60–1000, hàng trăm, hàng nghìn |
 | 6 | 🚀 Vũ Trụ Phép Nhân | 30 | Bảng nhân, thừa số, số nguyên tố, số vuông, bậc thang |
 
-Mỗi bài tương ứng **một tập phim** và gồm:
+Mỗi bài tương ứng **một tập** (ví dụ S01E01) và gồm:
 
-1. **Video**: nút mở đúng tập (ví dụ S01E01) trong Drive.
-2. **Học**: 3 trang Su giảng bằng hình minh họa (khối, tia số, mảng, bậc thang, khối 3D…). Su có thể đọc to bằng giọng tiếng Việt của máy.
-3. **Luyện tập**: 8 câu sinh ngẫu nhiên nên mỗi lần học lại sẽ khác. App có hơn 50 dạng bài như đếm, xếp khối, nhìn nhanh, tách số, so sánh, chẵn lẻ, đếm cách, chục–đơn vị, nhân, chia, toán có lời văn…
-4. **Nhiệm vụ ở nhà**: một hoạt động thực tế, có bài kèm phiếu in trong Drive.
+1. **Học**: 3 trang Su giảng bằng hình minh họa (khối, tia số, mảng, bậc thang, khối 3D…). Su có thể đọc to bằng giọng tiếng Việt của máy.
+2. **Luyện tập**: 8 câu sinh ngẫu nhiên nên mỗi lần học lại sẽ khác. App có hơn 50 dạng bài như đếm, xếp khối, nhìn nhanh, tách số, so sánh, chẵn lẻ, đếm cách, chục–đơn vị, nhân, chia, toán có lời văn…
+3. **Nhiệm vụ ở nhà**: một hoạt động thực tế, có bài kèm phiếu in trong Drive.
 
 Sau mỗi 5 bài có một **Thử thách** ôn tập gồm 10 câu. Các bài mở lần lượt theo thứ tự, và mùa sau chỉ mở khi con xong mùa trước. Ba mẹ có thể bật "Mở khóa toàn bộ".
 
 Nội dung nằm trong `js/curriculum.js`, mỗi tập một dòng. Dạng bài và hình minh họa được định nghĩa trong `js/engine.js`.
+
+## Đồng hành cùng con
+
+App nhắc ba mẹ ở màn chào, bản đồ học, trang bài học, màn kết quả và khu vực ba mẹ: *"Ba mẹ ơi, dành 10 phút mỗi ngày đồng hành cùng Su và con nhé"*.
 
 ## Sao thưởng
 
@@ -65,14 +68,14 @@ Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localSto
 
 - Chạy trên máy: `python3 -m http.server`, rồi mở `http://localhost:8000`.
 - GitHub Pages: vào **Settings → Pages → Deploy from a branch**, chọn nhánh và thư mục `/ (root)`.
-- App có `manifest.webmanifest` và `sw.js`, nên có thể "Thêm vào màn hình chính" và mở khi mất mạng. Video vẫn cần mạng để xem trên Drive.
+- App có `manifest.webmanifest` và `sw.js`, nên có thể "Thêm vào màn hình chính" và mở khi mất mạng.
 
 ## Cấu trúc
 
 ```
 index.html            khung trang
 css/style.css         giao diện (sáng/tối)
-js/curriculum.js      120 bài học, link video và phiếu in trên Drive
+js/curriculum.js      120 bài học và link phiếu in trên Drive
 js/engine.js          hình minh họa + bộ sinh câu hỏi
 js/mascots.js         nhân vật Su, Bi, Xu (SVG)
 js/app.js             tài khoản, bản đồ, bài học, sao thưởng, khu vực ba mẹ
