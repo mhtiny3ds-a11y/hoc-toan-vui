@@ -98,6 +98,8 @@ function beep(kind) {
 }
 const ava = (a, cls = '') => `<span class="ava ${cls}">${esc(a)}</span>`;
 const sayBox = (m, html, sp = true) => `<div class="say">${m}<div class="bubble">${html}${sp ? `<button class="spk" data-act="speak" aria-label="Nghe đọc">🔊</button>` : ''}</div></div>`;
+const REMIND = 'Ba mẹ ơi, dành 10 phút mỗi ngày đồng hành cùng Su và con nhé';
+const remindBox = () => `<div class="remind" role="note">${su('happy', 40)}<p><b>💛 ${REMIND}</b></p></div>`;
 const backBtn = (act = 'home', data = '') => `<button class="x" data-act="${act}" ${data} aria-label="Quay lại">←</button>`;
 
 /* ---------------- render gốc ---------------- */
@@ -116,7 +118,7 @@ function afterRender() {
 }
 
 /* ---------------- màn chào ---------------- */
-const DISCLAIMER = `<p><b>Học Toán Vui</b> là ứng dụng <b>độc lập, miễn phí</b>. Thứ tự bài học đi theo đúng các tập trong bộ tài liệu Numberblocks (Mùa 1 → Mùa 6, 120 tập) mà gia đình đã lưu trên Google Drive; mỗi bài có nút mở video tập tương ứng.</p><p>Ứng dụng <b>không phải sản phẩm chính thức</b> của Numberblocks, Blue Zoo, Alphablocks Ltd hay BBC và không liên kết với các đơn vị này. Nhân vật Su, Bi, Xu và toàn bộ nội dung luyện tập do Học Toán Vui tự biên soạn.</p>`;
+const DISCLAIMER = `<p><b>Học Toán Vui</b> là ứng dụng <b>độc lập, miễn phí</b>. Thứ tự bài học đi theo đúng các tập trong bộ tài liệu Numberblocks (Mùa 1 → Mùa 6, 120 tập) mà gia đình đã lưu trên Google Drive.</p><p>Ứng dụng <b>không phải sản phẩm chính thức</b> của Numberblocks, Blue Zoo, Alphablocks Ltd hay BBC và không liên kết với các đơn vị này. Nhân vật Su, Bi, Xu và toàn bộ nội dung luyện tập do Học Toán Vui tự biên soạn.</p>`;
 function vWelcome() {
   const f = fam(); const hasReal = Object.values(STORE.families).some(x => !x.demo);
   return `<div class="hero">
@@ -125,6 +127,7 @@ function vWelcome() {
     <span class="pill jade">Miễn phí 100% · không quảng cáo</span>
     <p class="muted lead">Toán tư duy cho bé theo chương trình <b>Numberblocks</b>: 120 bài từ số 1 đến phép nhân. Mỗi ngày một bài, làm nhiệm vụ, nhận sao thưởng.</p>
   </div>
+  ${remindBox()}
   ${sayBox(su('happy', 56), 'Chào con! Tớ là <b>khủng long Su</b>, tớ dạy toán. Bạn ong <b>Bi</b> giữ nhiệm vụ, còn heo đất <b>Xu</b> giữ hũ sao của con.')}
   <div class="stack">
     <button class="choice" data-act="toChild"><span class="ic" style="background:var(--gold-soft)">🎒</span><span><b>Con vào học</b><span class="muted tiny">${f ? 'Gia đình: ' + esc(f.parentName) : 'Chọn hồ sơ và nhập mã PIN 4 số'}</span></span></button>
@@ -243,6 +246,7 @@ function vLearn(f, c, p, s) {
   <section class="world" style="--c:${S.c}"><div><span class="eyebrow">Mùa ${s} · ${BY_SEASON[s].length} bài</span><h2 class="h2">${S.icon} ${S.name}</h2><p class="tiny">${S.sub}</p></div>
     <div class="meter"><i style="width:${Math.round(done / states.length * 100)}%"></i></div><span class="tiny"><b>${done}/${states.length}</b> chặng · hôm nay ${today} bài</span></section>
   ${sayBox(su(sOpen ? 'happy' : 'think', 60, 'bob'), hello)}
+  ${remindBox()}
   <div class="path">${path}</div>`;
 }
 function vMissions(f, c, p) {
@@ -300,8 +304,7 @@ function lessonSheet(s, i) {
   const l = n.l;
   return `<div class="stack"><div class="row"><span class="bigic">${l.icon}</span><div style="min-width:0"><span class="eyebrow">Mùa ${l.s} · Bài ${l.e} · ${l.code}</span><h2 class="h2">${esc(l.vi)}</h2><p class="tiny muted">Tập gốc: <i>${esc(l.en)}</i></p></div></div>
     <div class="goal">🎯 ${esc(l.goal)}</div>
-    ${l.video ? `<a class="btn ghost block" href="${driveFile(l.video)}" target="_blank" rel="noopener">▶️ Xem video tập ${l.code}</a>` : ''}
-    <p class="tiny muted">Gợi ý: xem video cùng ba mẹ trước, rồi học với Su và làm bài luyện tập.</p>
+    ${remindBox()}
     ${n.best ? `<p class="tiny">Kết quả tốt nhất: <b>${'★'.repeat(n.best)}${'☆'.repeat(3 - n.best)}</b></p>` : ''}
     <button class="btn block" data-act="startNode" data-s="${s}" data-i="${i}">📚 ${n.done ? 'Học lại' : 'Bắt đầu học'}</button></div>`;
 }
@@ -325,7 +328,7 @@ function vLesson() {
     <section class="card visbox" style="--accent:${SEASONS[l.s].c}">${vis(sl[1])}</section>
     <div class="dots">${l.learn.map((_, i) => `<i class="${i === L.slide ? 'on' : ''}"></i>`).join('')}</div>
     <div class="row">${L.slide > 0 ? '<button class="btn ghost" data-act="slide" data-d="-1">←</button>' : ''}<button class="btn block grow" data-act="slide" data-d="1">${last ? 'Luyện tập thôi! 💪' : 'Tiếp tục →'}</button></div>
-    ${l.video && L.slide === 0 ? `<a class="link tiny center" href="${driveFile(l.video)}" target="_blank" rel="noopener">▶️ Xem video tập ${l.code} trên Drive</a>` : ''}`;
+    ${L.slide === 0 ? remindBox() : ''}`;
   }
   const q = L.qs[L.qi], n = L.qs.length, answered = L.picked !== null;
   const ok = answered && L.picked === q.ans;
@@ -397,6 +400,7 @@ function vResult() {
       ${over ? `<p class="tiny muted">${over} sao vượt mức ${capOf(f)} sao/tuần nên không tính tiền, nhưng vẫn được ghi nhận.</p>` : ''}
       <div class="row between"><span>Hũ sao tuần này</span><b>${weekStars(f, c.id)}/${capOf(f)}</b></div>
     </section>
+    ${remindBox()}
     ${R.kind === 'lesson' && R.stars ? sayBox(bi('happy', 52), `Nhiệm vụ ở nhà: ${esc(R.l.mission)} <b>(+2 sao)</b>`, false) : ''}
     <div class="stack">
       ${R.stars ? '<button class="btn block" data-act="toMap">Tiếp tục hành trình →</button>' : ''}
@@ -429,7 +433,7 @@ function insightFor(f, c) {
   const p = prog(f, c.id); const weak = LESSONS.filter(l => p.lessons[l.id] === 1).slice(-3);
   const last = p.log.slice(-1)[0]; const days = last ? Math.floor((Date.now() - last.ts) / 864e5) : null;
   const tips = [];
-  if (days === null) tips.push('Con chưa học bài nào. Ba mẹ cùng con xem video tập 1 rồi học bài đầu tiên nhé.');
+  if (days === null) tips.push('Con chưa học bài nào. Ba mẹ ngồi cùng con học bài đầu tiên với Su nhé.');
   else if (days >= 3) tips.push(`Con đã nghỉ ${days} ngày. Một bài ngắn mỗi ngày giúp con nhớ lâu hơn.`);
   if (weak.length) tips.push(`Nên ôn lại: ${weak.map(l => `${l.code} (${l.vi})`).join(', ')}, hiện mới đạt 1 sao.`);
   const pend = Object.values(p.missions).filter(m => m.status === 'pending').length; if (pend) tips.push(`Có ${pend} nhiệm vụ đang chờ ba mẹ xác nhận.`);
@@ -437,6 +441,7 @@ function insightFor(f, c) {
 }
 function vPHome(f) {
   return `${sayBox(xu('happy', 56), `Chào ${esc(f.parentName)}! Đây là tình hình học của các con tuần này.`, false)}
+  ${remindBox()}
   ${f.children.map(c => {
     const p = prog(f, c.id), s = currentSeason(f, c.id), ld = lessonsDone(p), ws = weekStars(f, c.id);
     const recent = p.log.slice(-4).reverse();
@@ -447,7 +452,7 @@ function vPHome(f) {
       ${recent.length ? `<div class="ledger">${recent.map(r => { const l = LESSON[r.key]; return `<div class="li"><span>${l ? l.icon : '🏆'}</span><span class="tx">${l ? `${l.code} · ${esc(l.vi)}` : 'Thử thách ' + esc(r.key)}<small>${new Date(r.ts).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric' })} · đúng ${r.score}/${r.total}</small></span><span class="n">${'★'.repeat(r.stars) || '–'}</span></div>`; }).join('')}</div>` : ''}
     </section>`;
   }).join('')}
-  <section class="card stack"><h2 class="h3">📂 Tài liệu gốc</h2><p class="tiny muted">Video 6 mùa và phiếu in (thẻ số, bảng 100 ô, phiếu tô màu…) nằm trong thư mục Drive của gia đình.</p><a class="btn ghost block" href="${DRIVE_FOLDER}" target="_blank" rel="noopener">Mở thư mục Google Drive</a></section>
+  <section class="card stack"><h2 class="h3">📂 Tài liệu gốc</h2><p class="tiny muted">Phiếu in (thẻ số, bảng 100 ô, phiếu tô màu…) dùng cho nhiệm vụ ở nhà nằm trong thư mục Drive của gia đình.</p><a class="btn ghost block" href="${DRIVE_FOLDER}" target="_blank" rel="noopener">Mở thư mục Google Drive</a></section>
   ${spreadBlock()}${donateBlock()}`;
 }
 function vPApprove(f) {
@@ -528,7 +533,7 @@ function donateBlock() {
 }
 function spreadBlock() {
   return `<section class="card stack" style="background:var(--gold-soft);border-color:transparent">
-    <div class="say">${bi('cheer', 52)}<div class="grow"><b class="h3" style="display:block">Lan tỏa Học Toán Vui nha ba mẹ 💛</b><p class="tiny">Ba mẹ hãy đồng hành cùng con 15 phút mỗi ngày: xem một tập phim, học một bài, làm một nhiệm vụ.</p></div></div>
+    <div class="say">${bi('cheer', 52)}<div class="grow"><b class="h3" style="display:block">Lan tỏa Học Toán Vui nha ba mẹ 💛</b><p class="tiny">Ba mẹ ơi, dành 10 phút mỗi ngày đồng hành cùng Su và con nhé: học một bài, làm một nhiệm vụ.</p></div></div>
     <button type="button" class="btn sm gold" data-act="share">🔗 Chia sẻ cho bạn bè</button></section>`;
 }
 

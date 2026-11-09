@@ -1,6 +1,7 @@
 /* =====================================================================
    CHƯƠNG TRÌNH HỌC — bám theo đúng thứ tự các tập trong thư mục Drive
    (Mùa S01 → S06, 120 tập). Mỗi tập = 1 bài học trong app.
+   Ba mẹ đồng hành cùng con khoảng 10 phút mỗi ngày.
 
    Cấu trúc mỗi bài:
    [số tập, tên tập gốc, tên bài tiếng Việt, biểu tượng, mục tiêu,
@@ -31,14 +32,6 @@ const SEASONS = {
   6: { name: 'Vũ Trụ Phép Nhân', c: '#2F80ED', sub: 'Bảng nhân, hình chữ nhật, số vuông, bậc thang', icon: '🚀' }
 };
 
-const VIDEO = {
-  1: '1Mg-wEd2to3cYLcmG16I5A70AqahFgSP8 1lNGeCh7m3oBxFPBW7zZYlNYrpouGbqe_ 16fGZTWQx0SDsY7rF_HTnsyqVJImFOkrZ 10EfsT2K3rmcxGHhrWVpz8WDVdK880gxg 1jADLLyA-7pu_o2w73oOTfpuLSDS2Zpfd 1LYMyLqVIhu1MGQtTGjf52HaP1fh68ViG 1EN0r3_Zc5PMeqEseAk0-NsxcFr7mrs07 1tOYyuzdlL2Bwm99H4FbKC7QYAj-YicoP 1h7yNq74YhRHJIsGIGWQRePyKFdnDDIHy 18pl2D4_-wfXNZRnMExdqZg6ruixBLVrL 1tYAkxceN-VoBHY9R6qxUAH3TY50mCLwM 1OVq8D5S-8vxwDwK2SFm1nSjZU1Xnutt4 1PQxgX4_uVGrUZLxyYzSEQE4S1MzreTk3 1BxiMtb3w1LhWUnkMfG4ZdUTiw5L9Gcyg 1k-gX1EQvUhgbiw8i0ImTMpAe2Gj82pnY 16weJJiK1u7jcp8eu8ApKbwuAZ7CXixLd 1-GFLUlasXJ69KqdNYBdas1Zx_nMngheq 1A735DIUnnl5i-nMieBneyPlmcC2gGa_l 1Pv9StU4Xj3tKA3KW8dAqzeUiF99-lNSe 1Wu2nfPzH4w8ARhG4b4-6X3vYZdmRKL39',
-  2: '1S6nuIuomx6Ca0ejKFvrecbDEb9ocB610 1_dIqx2pZGZcbrSJMt4oDNW463cfHHyVl 1BbfqEWRL3V7AXhmBZGvus5xyRxAb8lyW 1UMLqezVSiVWS4zrtETqfiM4zCYFQOET0 1Q9NrQQO26RP6Ycw534ODqB9DOHAZj0uM 1l8cF8NtZYWZgpTDEE1N7TvpjklmoD5j2 1IX0jVGMv_xaxmdyv_Wurh_IpEcx8nCeo 1QJmyZbolV7bdWBfkwZAb_Cc84t4GWLA3 1RLir9CZ8gb782vn-3i4pF-oR4DphjEjd 15bUxItGAbs95_EGlaC8z0oG1IS5VC8Bc 1pTZq0xqmmv8D59ZXbFgNcjqHfu4m_dH6 1tDp_ZG7GW-Z0B4eua0eoldqxuajDNs1Y 1xvxb1e23twv4XE1r4Ty4AdrHL0j_ZUh_ 1tds5Cmhfixzt0hOTyz2EBu98ORwfkWVP 1Zd6IWYXtobg0Q_3dTA49NkzEZNwQ1DNc 1YIfCK200usSidxM0XzzwZdrOvrY62zip 1otbNNNSxuedbIzzT5lYPKoYOHdeIXzrd 1LMxA-J7F_n0u2z6D7nbz0z6XGM8Uu-ZT 10onjhhTNLT9-7BMPMTSu1s61E_yrGWRW 1us4hud54wvNCOl-w6oGUwYYroJAcWuSH 1YCB0WqXI2q3IqA5MXOMzBL3O9C9uCLFm 1lovFmSSGPZ3jEUbZ5KUbKzKLWr9YP93l 1tQh4oHKWgM-696ix2DOqWt5V2syf7sgN 1pdnK7qWh9TWHE07JQO2OTd9FCnGRL1BR 1RxtTbs05yIuRAxcv5xcFfdBzKhlqDV1e 1U1N1gmbpMAzy-WBDt77siaVCj--j6DUX 1f4pZv5agfDhKfbUKwVAyNn0iagyn1aBV 1xatTv50Hi3Yvic7B2n-xx0N06TTEi9n8 1_HH9lfzfG5kIWhRmV24ok5oX5BawQyY3 1sxPIm6Jv2EW18CB_l_GCpii6m1ToUe_V',
-  3: '1ELvc63e1hIRqQ6YF4TrZ07lEd45pEarc 1sgNSV8iVJP93R8kQz3yC-VgYLFZIHYhG 1gXF4z9CzbnLr7LnPa8IMnecqrI1Ig73j 1J_PUyDOf_e7scsku3QAS8Np5jNzZk2rX 1YkPI9O6rPhmbIVlbUETx4yWes81MkovG 1f7PGFW5peWA6FVj4ig2mYVqTTM3t-fpG 17ViI605BZ_LsrGxW5Rjl8WyjyOWDnYRh 1ur_fQiGrNAFoxmlEEsmgKKXdJeYzre_o 1kLCcQigojdhft4JtMi53ibeUqsZ38UPS 1pjg8kIEmb6dBJWqKt0yKpa32yV0dVorY 1cAN5mG4egpxfs0-O4H0WYb2CsOPwzfaB 129NuZZ1QoQ-pfKPHs1slWiMcR2i0Ww-O 1F71iCuI29rOIj-ErFFSMySCvL11qMbc5 1J6magYy1dIQn2JWHQRqM5nDhOkgjak2u 17R-lxmQFxyV6xqqB2sQzEa6hkj0uMQP_ 1LSvnxqCjYgVWXU8faS3Efhue5atKV8k2 1xRHtx6rDWeUKYFg6nNzA92IAjtNLOdyv 1URehXEh2d2GqlJ9yL6tQdgsHs5ZaHKOw 1fZSx8Dw5iFJO7pAmllV3oo3Ew-0IHNe8 1wEgn-dz5Yct0PNBtHOIphJ9LA-4IQ9Tg 1SXNsRPp4s-oNS2FExVtdrnBDvXt1tUHe 1EuGAfxKCQUHlLAiJjx3b9j-qrmV0aGTe 1UuwOfZ99hdqvmw2cjxxCgyKeaVMQwkjJ 1U_J6qAWTMJy2rpJ_DlplCz5n_f5mBvrS 1FJxpdl2Olt4N5fhQ-i6v_Yxc6-NPBula 1RjmvaowpSwQuxPDPJ4ZxfE9cnicVymX5 1S-Kl_YFGxREMH7VyJk8Se16F9onXP6p7 1wZn7PhdV-IJXpR878LetjS3wFTM-HyoZ 1eS-ET8fgbuuqlAXuwayhdz-8Fd-3zuYI 1W8tIFzz2bDeHqBFk9SOLpsA6HvP0j09Q',
-  4: '1Po0LtD17Hh6Le27Ex9qxkd9A8uMm7NIj 1qQzI7JG7_TiZIkeTDtpXAB9d8EoPksOA 1cE1K6CJpx0UBDdaTa5_xwq0eanDKNNvH 1faCPRxM81CluLr_E1r-lpKvPnVtDAWRe 1xZ-a9ycMRQegrO8dDyfvAJpEglrlrZBw',
-  5: '1FJyRxzWM1Gu5MGp8_KsBTD7eAfbpQewi 1rD4d2VtrWhY1_B8fzFA23-HaCAXUbbmv 1QpB1wd03ph2G6Vh4u4yVRsd9uG8yKvfQ 1RNZK9ThjUcjM6K0Uz7cw2ek_JUV_9Kaq 1Hh8qaGDsG0VFg-v4CYmcnH6-CN63z_50',
-  6: '1mSZC1ro1WV_izvN5zZitZvMFWTVFN8A4 1q23q2SU3wRIKk7c-bp-CGlB3ll4QhB4h 1ynhLgBG7mosyzbb23byXsHex4XwhfF-C 14A_FdFbwqZ2wyNtiWiIG_DgSn-4UbSnz 1bw04rHFSrFhr-_TX7iMUa-QQlk96KOeX 1Wuwu4e-0NAENqejS6R2bXoTFHeYxdDVD 1CwuavYv5v_AU6RSVN4ak6qdvNbD_LfvC 1lunWH3vKeSOUi38ZcgBRVduqRO18GS-5 1lKLoxtGuVtsBwsf2_E3KJAXPNUTZ6DSL 1QtCXrkKtSomlWiul_tnDZCky5mGWXB0c 1t_7wdmxPfyPzoFQMhX_d1MwiSi-ggJle 10W2D7cWY-1QuvNGPGsHYw1ZC99_0-Siz 1V2iWhniL6noCU-IyniyCqYBIAzec7u-R 1hjt9ZOE9UjxrXCeaUL75hMigUB-YcTlp 1jcNxrvMM8CfIch535Lpe-IRqUJLA6S_a 1AlJfbtVtqhk7kY_zo2vIkUHrNJdXuuVp 1bhGIX240yGs6tH7SMYNsdqkvmCY7DXXh 15ZYMDOKRqtG1dec_-jeqJ-YOPt-IesVo 12JT0hbP7s56icvke48_oqtWUu78evkxi 1geLOEnSlG92hBxtZvCxJRkqnT-LVFjg8 1Npbw1MZ2T84Xqh2UVC6orXYcqhM5ytI3 1A5d-M9CzcgbhwRnm2R6a5G40230m0-un 1NgOIsc2gfqWRBTYktRct53zcwWIawCbB 1c_j7xONU7uHkbbo8x9N23UfQKHs_7zjU 1gDmCzO1MO_dKVcImRI_p0c5vEfKfGLag 1_n2WXWO0hMBNphmYoyUQKCG6kttIRgsG 1HDHpUYBGpshA3snNU-mSUHBJU_FiGAXh 1Y1GaTDTQHcpXJNPs9FcXrqN7W6z-xJew 1aHmMBwDhUEG7XMYO1CAy-XUPGllEw-2H 1ykE7JJrwu2ZO0OWESSbD6RbzOS9PDG7C'
-};
 
 /* Phiếu in trong thư mục Drive (dùng làm nhiệm vụ ở nhà) */
 const SHEET = {
@@ -430,13 +423,12 @@ const RAW = {
 const LESSONS = [];
 const BY_SEASON = {};
 for (const s in RAW) {
-  const vids = VIDEO[s].split(' ');
   BY_SEASON[s] = RAW[s].map(r => {
     const [e, en, vi, icon, goal, learn, quiz, mission, sheet] = r;
     const L = {
       id: `s${s}e${e}`, s: +s, e, code: `S0${s}E${String(e).padStart(2, '0')}`,
       en, vi, icon, goal, learn, quiz: quiz.split(' '), mission,
-      video: vids[e - 1] || null, sheet: sheet ? SHEET[sheet] : null
+      sheet: sheet ? SHEET[sheet] : null
     };
     LESSONS.push(L);
     return L;
