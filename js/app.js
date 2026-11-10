@@ -11,7 +11,6 @@ const vnd = n => n.toLocaleString('vi-VN') + 'đ';
 const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 function weekKey(d = new Date()) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return dayKey(x); }
-const driveFile = id => `https://drive.google.com/file/d/${id}/view`;
 
 /* ---------------- lưu trữ ---------------- */
 let STORE = { families: {}, dev: { familyId: null } };
@@ -118,14 +117,48 @@ function afterRender() {
 }
 
 /* ---------------- màn chào ---------------- */
-const DISCLAIMER = `<p><b>Học Toán Vui</b> là ứng dụng <b>độc lập, miễn phí</b>. Thứ tự bài học đi theo đúng các tập trong bộ tài liệu Numberblocks (Mùa 1 → Mùa 6, 120 tập) mà gia đình đã lưu trên Google Drive.</p><p>Ứng dụng <b>không phải sản phẩm chính thức</b> của Numberblocks, Blue Zoo, Alphablocks Ltd hay BBC và không liên kết với các đơn vị này. Nhân vật Su, Bi, Xu và toàn bộ nội dung luyện tập do Học Toán Vui tự biên soạn.</p>`;
+const DISCLAIMER = `<p><b>Học Toán Vui</b> là ứng dụng học toán <b>độc lập, miễn phí, phi thương mại</b>, dùng trong gia đình. Chương trình gồm 6 chặng, 120 bài do Học Toán Vui tự biên soạn dựa trên kiến thức toán phổ thông dành cho trẻ mầm non và tiểu học.</p><p>Ứng dụng <b>không liên kết, không được tài trợ hay bảo trợ</b> bởi bất kỳ chương trình, thương hiệu, nhà xuất bản hay tổ chức giáo dục nào. Nhân vật Su, Bi, Xu là nhân vật riêng của Học Toán Vui.</p>`;
+const TERMS = [
+  ['📚', 'Nội dung bài học', [
+    'Toàn bộ bài giảng, câu hỏi, hình minh họa và nhiệm vụ do Học Toán Vui tự biên soạn từ kiến thức toán phổ thông (đếm, cộng, trừ, nhân, chia, hình học cơ bản). Các con số, phép tính và khái niệm toán học là kiến thức chung, không thuộc sở hữu riêng của ai.',
+    'Nội dung chỉ mang tính <b>tham khảo, hỗ trợ ôn luyện tại nhà</b>; không thay thế chương trình chính thức của nhà trường, giáo viên hay chuyên gia giáo dục, và không cam kết bất kỳ kết quả học tập cụ thể nào.',
+    'Ứng dụng không liên kết, không được tài trợ hay bảo trợ bởi bất kỳ chương trình, thương hiệu, nhà xuất bản hay tổ chức giáo dục nào. Mọi tên gọi, nhãn hiệu (nếu có nhắc đến) thuộc về chủ sở hữu tương ứng.',
+    'Nếu ba mẹ hoặc bất kỳ ai cho rằng một nội dung nào đó trong ứng dụng ảnh hưởng đến quyền của mình, vui lòng liên hệ qua kho mã nguồn của ứng dụng; nội dung đó sẽ được xem xét và gỡ bỏ hoặc chỉnh sửa.'
+  ]],
+  ['⭐', 'Sao thưởng', [
+    'Sao là <b>công cụ khích lệ trong gia đình</b>. Quy đổi "1 sao = 1.000đ" chỉ là gợi ý để ba mẹ tự thỏa thuận với con; ba mẹ hoàn toàn có quyền thưởng bằng hình thức khác hoặc không thưởng tiền.',
+    'Học Toán Vui <b>không giữ, không chuyển, không thanh toán</b> bất kỳ khoản tiền nào. Sao không phải tiền điện tử, ví điện tử, điểm thưởng có giá trị quy đổi, giải thưởng hay trò chơi có thưởng, và không thể rút, chuyển nhượng hay đổi lấy tiền từ ứng dụng.',
+    'Giới hạn tối đa 50 sao/tuần giúp phần thưởng ở mức hợp lý. Việc trao thưởng thực tế hoàn toàn do ba mẹ quyết định và tự chịu trách nhiệm.'
+  ]],
+  ['☕', 'Ủng hộ (donate)', [
+    'Ủng hộ là <b>hoàn toàn tự nguyện</b>, mang tính chất quà tặng cá nhân để tác giả duy trì ứng dụng. Đây <b>không phải</b> khoản thanh toán mua hàng, phí dịch vụ, phí thành viên hay khoản đầu tư.',
+    'Ứng dụng luôn miễn phí đầy đủ tính năng dù ba mẹ có ủng hộ hay không. Người ủng hộ <b>không nhận được</b> và không phát sinh bất kỳ quyền lợi, ưu đãi, cam kết hỗ trợ, quyền sở hữu hay nghĩa vụ nào giữa hai bên.',
+    'Khoản ủng hộ không được hoàn lại. Ba mẹ vui lòng kiểm tra kỹ tên chủ tài khoản và số tài khoản trước khi chuyển, chỉ ủng hộ trong khả năng của mình và tự chịu trách nhiệm về giao dịch.',
+    'Ứng dụng không bao giờ yêu cầu chuyển tiền để mở bài học hay tính năng. Nếu thấy yêu cầu như vậy, đó không phải từ Học Toán Vui.'
+  ]],
+  ['🔒', 'Dữ liệu và quyền riêng tư', [
+    'Tài khoản, tiến độ và sao chỉ lưu <b>trong trình duyệt trên máy của gia đình</b>. Ứng dụng không có máy chủ, không thu thập, không gửi và không bán dữ liệu của ba mẹ hay của con.',
+    'Mật khẩu và mã PIN được mã hóa một chiều trước khi lưu. Tuy vậy đây là ứng dụng dùng trong gia đình, không phải hệ thống bảo mật chuyên dụng; ba mẹ không nên nhập thông tin nhạy cảm.',
+    'Dữ liệu có thể mất khi xóa dữ liệu trình duyệt hoặc đổi máy. Ba mẹ tự chịu trách nhiệm sao lưu bằng chức năng "Tải file sao lưu".'
+  ]],
+  ['👨‍👩‍👧', 'Trẻ em sử dụng', [
+    'Tài khoản gia đình do ba mẹ (người giám hộ) tạo và quản lý. Trẻ nên sử dụng ứng dụng dưới sự đồng hành, giám sát của ba mẹ, với thời lượng phù hợp lứa tuổi.'
+  ]],
+  ['⚖️', 'Miễn trừ trách nhiệm', [
+    'Ứng dụng được cung cấp <b>"nguyên trạng"</b>, không kèm bất kỳ bảo đảm nào về tính chính xác tuyệt đối, tính liên tục hay sự phù hợp cho một mục đích cụ thể.',
+    'Trong phạm vi pháp luật cho phép, tác giả không chịu trách nhiệm về bất kỳ thiệt hại trực tiếp hay gián tiếp nào phát sinh từ việc sử dụng ứng dụng, từ việc mất dữ liệu, hay từ các thỏa thuận thưởng giữa ba mẹ và con.',
+    'Điều khoản có thể được cập nhật khi ứng dụng thay đổi. Việc tiếp tục sử dụng đồng nghĩa với việc ba mẹ chấp nhận điều khoản mới nhất.'
+  ]]
+];
+const termsHtml = () => DISCLAIMER + TERMS.map(([i, t, ps]) => `<h3 class="h3" style="margin-top:14px">${i} ${t}</h3><ul class="terms">${ps.map(x => `<li>${x}</li>`).join('')}</ul>`).join('');
+const termsLink = (txt = 'Điều khoản & lưu ý') => `<button type="button" class="link tiny" data-act="terms">${txt}</button>`;
 function vWelcome() {
   const f = fam(); const hasReal = Object.values(STORE.families).some(x => !x.demo);
   return `<div class="hero">
     <div class="cast">${bi('happy', 66, 'bob2')}${su('cheer', 130, 'bob')}${xu('happy', 66, 'bob2')}</div>
     <div class="brand">Học Toán <b>Vui</b></div>
     <span class="pill jade">Miễn phí 100% · không quảng cáo</span>
-    <p class="muted lead">Toán tư duy cho bé theo chương trình <b>Numberblocks</b>: 120 bài từ số 1 đến phép nhân. Mỗi ngày một bài, làm nhiệm vụ, nhận sao thưởng.</p>
+    <p class="muted lead">Toán tư duy cho bé qua 6 chặng, 120 bài từ số 1 đến phép nhân. Mỗi ngày một bài, làm nhiệm vụ, nhận sao thưởng.</p>
   </div>
   ${remindBox()}
   ${sayBox(su('happy', 56), 'Chào con! Tớ là <b>khủng long Su</b>, tớ dạy toán. Bạn ong <b>Bi</b> giữ nhiệm vụ, còn heo đất <b>Xu</b> giữ hũ sao của con.')}
@@ -136,10 +169,17 @@ function vWelcome() {
   </div>
   ${hasReal ? '' : `<div class="demo">Muốn xem thử? <button class="link" data-act="demo">Mở gia đình mẫu</button> · ba mẹ: <b>demo</b> / <b>123456</b> · Bông: PIN <b>1111</b> · Tí: PIN <b>2222</b></div>`}
   ${restoreBlock()}
-  <details class="card disc"><summary>Về Học Toán Vui</summary>${DISCLAIMER}</details>`;
+  <details class="card disc"><summary>Về Học Toán Vui</summary>${DISCLAIMER}<p>${termsLink('Xem đầy đủ điều khoản & lưu ý →')}</p></details>`;
 }
 const restoreBlock = () => `<label class="link tiny center" style="display:block">📂 Khôi phục từ file sao lưu<input type="file" accept="application/json,.json" data-act="restore" hidden></label>`;
-function vAbout() { return `<div class="row">${backBtn('go', 'data-v="welcome"')}<h1 class="h2">Về ứng dụng</h1></div><section class="card stack">${DISCLAIMER}</section>`; }
+/* mở điều khoản dạng hộp nổi, không vẽ lại trang để giữ nguyên dữ liệu ba mẹ đang nhập */
+function openTerms() {
+  document.getElementById('terms-modal')?.remove();
+  const m = document.createElement('div'); m.id = 'terms-modal'; m.className = 'scrim'; m.dataset.act = 'termsClose';
+  m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="terms-h"><div class="row between"><h2 class="h2" id="terms-h">Điều khoản & lưu ý</h2><button type="button" class="x" data-act="termsClose" aria-label="Đóng">✕</button></div><div class="disc">${termsHtml()}<p class="tiny muted" style="margin-top:14px">Cập nhật: 11/2026</p></div><button type="button" class="btn block" data-act="termsClose" style="margin-top:14px">Đã hiểu</button></div>`;
+  document.body.appendChild(m); m.querySelector('.x').focus();
+}
+function vAbout() { return `<div class="row">${backBtn('go', 'data-v="welcome"')}<h1 class="h2">Điều khoản & lưu ý</h1></div><section class="card disc">${termsHtml()}<p class="tiny muted" style="margin-top:14px">Cập nhật: 11/2026</p></section>`; }
 
 /* ---------------- đăng nhập / đăng ký ---------------- */
 function vParentLogin() {
@@ -181,6 +221,7 @@ function vRegister() {
     <div class="field"><label>Tên con</label><input name="cn" required maxlength="24" placeholder="VD: Bông"></div>
     <div class="field"><label>Chọn hình đại diện</label>${avatarPicker('ca', '🦊')}</div>
     <div class="field"><label>Mã PIN của con (4 số)</label><input name="cpin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required></div>
+    <label class="toggle tiny"><input type="checkbox" name="agree" required><span>Tôi là ba mẹ/người giám hộ của con, đã đọc và đồng ý ${termsLink('Điều khoản & lưu ý')} (nội dung học, sao thưởng, ủng hộ, dữ liệu).</span></label>
     ${UI.err ? `<p class="err">${esc(UI.err)}</p>` : ''}
     <button class="btn block">Tạo tài khoản</button>
     <p class="tiny muted">Dữ liệu chỉ lưu trên máy này. Ba mẹ nên tải file sao lưu định kỳ trong mục Tài khoản.</p>
@@ -215,7 +256,7 @@ function vChild() {
   const f = fam(), c = curChild(); if (!f || !c) return vProfiles();
   const p = prog(f, c.id), ws = weekStars(f, c.id);
   const s = UI.season || p.lastSeason || 1;
-  const top = `<div class="topbar">${ava(c.avatar, 'sm')}<div class="who"><b>${esc(c.name)}</b><span class="tiny muted">Mùa ${s} · ${SEASONS[s].name}</span></div>
+  const top = `<div class="topbar">${ava(c.avatar, 'sm')}<div class="who"><b>${esc(c.name)}</b><span class="tiny muted">Chặng ${s} · ${SEASONS[s].name}</span></div>
     <span class="statpill" title="Chuỗi ngày học">🔥 ${streakNow(p)}</span><span class="statpill" title="Sao tuần này">⭐ ${ws}/${capOf(f)}</span></div>`;
   let body = '';
   if (UI.tab === 'learn') body = vLearn(f, c, p, s);
@@ -241,9 +282,9 @@ function vLearn(f, c, p, s) {
       <span class="disc">${n.current ? '<span class="here">Học tiếp</span>' : ''}<span class="em">${ic}</span></span>
       <span class="lbl">${lab}</span>${n.best ? `<span class="st">${'★'.repeat(n.best)}${'☆'.repeat(3 - n.best)}</span>` : ''}</button>`;
   });
-  const hello = !sOpen ? `Mùa ${s} sẽ mở khi con hoàn thành <b>Mùa ${s - 1}</b> nhé!` : cur ? (cur.type === 'lesson' ? `Hôm nay mình học <b>Bài ${cur.l.e}: ${esc(cur.l.vi)}</b> nhé!` : `Đến <b>Thử thách ${cur.k}</b> rồi! Ôn lại 5 bài vừa học.`) : `Con đã xong cả <b>${S.name}</b>! Giỏi quá!`;
-  return `<div class="seasonbar" role="tablist">${[1, 2, 3, 4, 5, 6].map(k => `<button class="chip ${k == s ? 'on' : ''}" style="--c:${SEASONS[k].c}" data-act="season" data-s="${k}" role="tab" aria-selected="${k == s}">${seasonOpen(f, p, k) ? '' : '🔒 '}Mùa ${k}</button>`).join('')}</div>
-  <section class="world" style="--c:${S.c}"><div><span class="eyebrow">Mùa ${s} · ${BY_SEASON[s].length} bài</span><h2 class="h2">${S.icon} ${S.name}</h2><p class="tiny">${S.sub}</p></div>
+  const hello = !sOpen ? `Chặng ${s} sẽ mở khi con hoàn thành <b>Chặng ${s - 1}</b> nhé!` : cur ? (cur.type === 'lesson' ? `Hôm nay mình học <b>Bài ${cur.l.e}: ${esc(cur.l.vi)}</b> nhé!` : `Đến <b>Thử thách ${cur.k}</b> rồi! Ôn lại 5 bài vừa học.`) : `Con đã xong cả <b>${S.name}</b>! Giỏi quá!`;
+  return `<div class="seasonbar" role="tablist">${[1, 2, 3, 4, 5, 6].map(k => `<button class="chip ${k == s ? 'on' : ''}" style="--c:${SEASONS[k].c}" data-act="season" data-s="${k}" role="tab" aria-selected="${k == s}">${seasonOpen(f, p, k) ? '' : '🔒 '}Chặng ${k}</button>`).join('')}</div>
+  <section class="world" style="--c:${S.c}"><div><span class="eyebrow">Chặng ${s} · ${BY_SEASON[s].length} bài</span><h2 class="h2">${S.icon} ${S.name}</h2><p class="tiny">${S.sub}</p></div>
     <div class="meter"><i style="width:${Math.round(done / states.length * 100)}%"></i></div><span class="tiny"><b>${done}/${states.length}</b> chặng · hôm nay ${today} bài</span></section>
   ${sayBox(su(sOpen ? 'happy' : 'think', 60, 'bob'), hello)}
   ${remindBox()}
@@ -254,8 +295,7 @@ function vMissions(f, c, p) {
   LESSONS.forEach(l => { const m = p.missions[l.id]; if (m || p.lessons[l.id] > 0) items.push({ l, m }); });
   const pending = items.filter(x => x.m?.status === 'pending'), todo = items.filter(x => !x.m || x.m.status === 'rejected'), done = items.filter(x => x.m?.status === 'approved');
   const today = p.log.filter(l => dayKey(new Date(l.ts)) === dayKey()).length, goal = Math.min(today, 2);
-  const card = x => `<div class="mission"><div class="hd"><span class="ic">${x.l.icon}</span><div class="tx"><b>Bài ${x.l.e}: ${esc(x.l.vi)}</b><span class="tiny muted">Mùa ${x.l.s} · ${x.l.code}</span></div>${x.m?.status === 'approved' ? '<span class="pill jade">+2 ⭐</span>' : ''}</div><p>${esc(x.l.mission)}</p>
-    ${x.l.sheet ? `<a class="link tiny" href="${driveFile(x.l.sheet)}" target="_blank" rel="noopener">📄 Mở phiếu in trên Drive</a>` : ''}
+  const card = x => `<div class="mission"><div class="hd"><span class="ic">${x.l.icon}</span><div class="tx"><b>Bài ${x.l.e}: ${esc(x.l.vi)}</b><span class="tiny muted">Chặng ${x.l.s} · ${x.l.code}</span></div>${x.m?.status === 'approved' ? '<span class="pill jade">+2 ⭐</span>' : ''}</div><p>${esc(x.l.mission)}</p>
     ${x.m?.status === 'rejected' ? '<p class="tiny err">Ba mẹ nhắn: con làm lại nhiệm vụ này nhé!</p>' : ''}
     ${!x.m || x.m.status === 'rejected' ? `<div class="row"><button class="btn sm jade" data-act="missionDone" data-id="${x.l.id}">✅ Con đã làm xong</button></div>` : x.m.status === 'pending' ? '<div class="row"><span class="pill gold">⏳ Chờ ba mẹ xác nhận</span></div>' : ''}</div>`;
   return `${sayBox(bi('happy', 62, 'bob'), 'Tớ là ong <b>Bi</b>! Mỗi bài học có một nhiệm vụ làm ở nhà. Làm xong, bấm nút, ba mẹ xác nhận là con được <b>2 sao</b>.')}
@@ -275,6 +315,7 @@ function vRewards(f, c, p) {
     <div class="stack" style="gap:4px;min-width:0"><span class="eyebrow">Tuần này</span><span class="money">${vnd(ws * STAR)}</span>
     <span class="tiny muted">${ws >= cp ? 'Con đã đầy hũ tuần này! Cứ học tiếp, sao luyện tập vẫn được ghi lại.' : `Còn ${cp - ws} sao nữa là đầy hũ tuần này.`}</span></div></section>
   <section class="card row between"><div><div class="eyebrow">Ba mẹ sẽ trao cho con</div><div class="money">${vnd(up * STAR)}</div></div><span style="font-size:40px">🎁</span></section>
+  <p class="tiny muted">Sao là cách ba mẹ khích lệ con trong gia đình. Ứng dụng không giữ hay chuyển tiền; việc trao thưởng do ba mẹ quyết định.</p>
   <h2 class="h3">Cách nhận sao</h2>
   <section class="card howto"><div><b>⭐ 1–3</b> Mỗi bài học, tùy số câu đúng</div><div><b>⭐ 1–3</b> Mỗi thử thách sau 5 bài</div><div><b>⭐ 2</b> Mỗi nhiệm vụ ở nhà ba mẹ xác nhận</div><div><b>⭐ +</b> Ba mẹ thưởng thêm khi con cố gắng</div><p class="tiny muted">Học lại bài cũ chỉ được thêm sao khi con làm tốt hơn lần trước.</p></section>
   <h2 class="h3">Huy hiệu</h2>
@@ -296,13 +337,13 @@ function vMe(f, c, p) {
 /* ---------------- sheet chi tiết bài ---------------- */
 function lessonSheet(s, i) {
   const f = fam(), c = curChild(); const n = nodeStates(f, c.id, s)[i];
-  if (n.type === 'challenge') return `<div class="stack"><div class="row">${su('cheer', 64)}<div><span class="eyebrow">Mùa ${s} · Thử thách ${n.k}</span><h2 class="h2">Ôn tập 5 bài</h2></div></div>
+  if (n.type === 'challenge') return `<div class="stack"><div class="row">${su('cheer', 64)}<div><span class="eyebrow">Chặng ${s} · Thử thách ${n.k}</span><h2 class="h2">Ôn tập 5 bài</h2></div></div>
     <ul class="mini">${n.grp.map(l => `<li>${l.icon} ${l.e}. ${esc(l.vi)}</li>`).join('')}</ul>
     <p class="muted tiny">10 câu hỏi trộn từ 5 bài vừa học. Đúng nhiều được tới 3 sao!</p>
     ${n.best ? `<p class="tiny">Kết quả tốt nhất: <b>${'★'.repeat(n.best)}</b></p>` : ''}
     <button class="btn block" data-act="startNode" data-s="${s}" data-i="${i}">🏆 Bắt đầu thử thách</button></div>`;
   const l = n.l;
-  return `<div class="stack"><div class="row"><span class="bigic">${l.icon}</span><div style="min-width:0"><span class="eyebrow">Mùa ${l.s} · Bài ${l.e} · ${l.code}</span><h2 class="h2">${esc(l.vi)}</h2><p class="tiny muted">Tập gốc: <i>${esc(l.en)}</i></p></div></div>
+  return `<div class="stack"><div class="row"><span class="bigic">${l.icon}</span><div style="min-width:0"><span class="eyebrow">Chặng ${l.s} · Bài ${l.e} · ${l.code}</span><h2 class="h2">${esc(l.vi)}</h2></div></div>
     <div class="goal">🎯 ${esc(l.goal)}</div>
     ${remindBox()}
     ${n.best ? `<p class="tiny">Kết quả tốt nhất: <b>${'★'.repeat(n.best)}${'☆'.repeat(3 - n.best)}</b></p>` : ''}
@@ -323,7 +364,7 @@ function vLesson() {
   if (L.phase === 'learn') {
     const l = L.l, sl = l.learn[L.slide], last = L.slide === l.learn.length - 1;
     return head(Math.round((L.slide + 1) / (l.learn.length + 1) * 30), 'Học') + `
-    <div class="ltitle"><span class="eyebrow">${l.code} · ${esc(l.en)}</span><h1 class="h2">${l.icon} ${esc(l.vi)}</h1></div>
+    <div class="ltitle"><span class="eyebrow">Chặng ${l.s} · Bài ${l.e}</span><h1 class="h2">${l.icon} ${esc(l.vi)}</h1></div>
     ${sayBox(su(last ? 'cheer' : 'happy', 64, 'bob'), sl[0])}
     <section class="card visbox" style="--accent:${SEASONS[l.s].c}">${vis(sl[1])}</section>
     <div class="dots">${l.learn.map((_, i) => `<i class="${i === L.slide ? 'on' : ''}"></i>`).join('')}</div>
@@ -347,7 +388,7 @@ function vLesson() {
   }
   const fb = answered ? `<div class="feedback ${ok ? 'ok' : 'no'}" role="status"><div class="row">${ok ? su('cheer', 54) : su('oops', 54)}<div style="min-width:0"><b>${ok ? pickOne(['Đúng rồi! Giỏi quá!', 'Chính xác! 🎉', 'Tuyệt vời!', 'Con làm tốt lắm!']) : 'Chưa đúng rồi, không sao cả!'}</b><p class="tiny">${q.ex}</p></div></div><button class="btn block ${ok ? 'jade' : ''}" data-act="nextQ" autofocus>${L.qi === n - 1 ? 'Xem kết quả' : 'Câu tiếp theo →'}</button></div>` : '';
   return head(30 + Math.round(L.qi / n * 70), `${L.qi + 1}/${n}`) + `
-    ${L.kind === 'challenge' ? `<div class="ltitle"><span class="eyebrow">Mùa ${L.s} · Thử thách ${L.k}</span></div>` : ''}
+    ${L.kind === 'challenge' ? `<div class="ltitle"><span class="eyebrow">Chặng ${L.s} · Thử thách ${L.k}</span></div>` : ''}
     <div class="qline">${su('think', 44)}<h2 class="qtext">${q.q}</h2><button class="spk" data-act="speakQ" aria-label="Nghe đọc câu hỏi">🔊</button></div>
     ${body}${fb}`;
 }
@@ -371,7 +412,7 @@ function finishLesson() {
   let res = { n: 0, counted: 0, over: 0 };
   if (stars > prev) {
     book[L.key] = stars;
-    const reason = L.kind === 'lesson' ? `Bài ${L.l.code}: ${L.l.vi}` : `Thử thách ${L.k} · Mùa ${L.s}`;
+    const reason = L.kind === 'lesson' ? `Bài ${L.l.code}: ${L.l.vi}` : `Thử thách ${L.k} · Chặng ${L.s}`;
     res = award(f, c.id, stars - prev, reason);
   }
   p.log.push({ ts: Date.now(), key: L.key, score: L.correct, total: n, stars });
@@ -447,12 +488,11 @@ function vPHome(f) {
     const recent = p.log.slice(-4).reverse();
     return `<section class="card stack"><div class="row">${ava(c.avatar, 'sm')}<b class="h3 grow">${esc(c.name)}</b><span class="statpill">🔥 ${streakNow(p)}</span></div>
       <div class="kpis"><div><b>${ld}</b><span>/120 bài</span></div><div><b>${ws}</b><span>/${capOf(f)} sao tuần</span></div><div><b>${vnd(unpaid(f, c.id) * STAR)}</b><span>chưa trao</span></div></div>
-      <div><span class="tiny muted">Đang học: <b>Mùa ${s} · ${SEASONS[s].name}</b></span><div class="meter"><i style="width:${Math.round(ld / 120 * 100)}%"></i></div></div>
+      <div><span class="tiny muted">Đang học: <b>Chặng ${s} · ${SEASONS[s].name}</b></span><div class="meter"><i style="width:${Math.round(ld / 120 * 100)}%"></i></div></div>
       ${insightFor(f, c).map(t => `<p class="tip">💡 ${esc(t)}</p>`).join('')}
       ${recent.length ? `<div class="ledger">${recent.map(r => { const l = LESSON[r.key]; return `<div class="li"><span>${l ? l.icon : '🏆'}</span><span class="tx">${l ? `${l.code} · ${esc(l.vi)}` : 'Thử thách ' + esc(r.key)}<small>${new Date(r.ts).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric' })} · đúng ${r.score}/${r.total}</small></span><span class="n">${'★'.repeat(r.stars) || '–'}</span></div>`; }).join('')}</div>` : ''}
     </section>`;
   }).join('')}
-  <section class="card stack"><h2 class="h3">📂 Tài liệu gốc</h2><p class="tiny muted">Phiếu in (thẻ số, bảng 100 ô, phiếu tô màu…) dùng cho nhiệm vụ ở nhà nằm trong thư mục Drive của gia đình.</p><a class="btn ghost block" href="${DRIVE_FOLDER}" target="_blank" rel="noopener">Mở thư mục Google Drive</a></section>
   ${spreadBlock()}${donateBlock()}`;
 }
 function vPApprove(f) {
@@ -475,6 +515,7 @@ function vPApprove(f) {
 function vPWallet(f) {
   const weeks = [...Array(6)].map((_, k) => weekKey(addDays(new Date(), -7 * k)));
   return `${sayBox(xu('happy', 56), `Mỗi sao = <b>1.000đ</b>. Hệ thống tự dừng tính thưởng khi con đạt <b>${capOf(f)} sao/tuần</b> (tối đa 50 sao = 50.000đ). Trao tiền xong, ba mẹ bấm "Đã trao" để ghi sổ.`, false)}
+  <p class="note">ℹ️ Quy đổi 1 sao = 1.000đ chỉ là <b>gợi ý</b> để ba mẹ khích lệ con. Học Toán Vui không giữ, không chuyển và không thanh toán tiền; sao không có giá trị quy đổi ngoài gia đình. Ba mẹ có thể thưởng bằng hình thức khác. ${termsLink('Xem điều khoản')}</p>
   ${f.children.map(c => {
     const up = unpaid(f, c.id), conf = UI.confirm === 'pay:' + c.id;
     return `<section class="card stack"><div class="row">${ava(c.avatar, 'sm')}<b class="h3 grow">${esc(c.name)}</b></div>
@@ -509,7 +550,7 @@ function vPAccount(f) {
   <section class="card stack"><p class="tiny muted">Dữ liệu chỉ nằm trên máy này. Tải file sao lưu để chuyển sang máy khác hoặc phòng khi xóa dữ liệu trình duyệt.</p>
     <button class="btn sm ghost block" data-act="backup">⬇️ Tải file sao lưu</button>
     <label class="btn sm ghost block">📂 Khôi phục từ file<input type="file" accept="application/json,.json" data-act="restore" hidden></label></section>
-  <section class="card stack"><button class="btn sm ghost block" data-act="go" data-v="about">ℹ️ Về Học Toán Vui</button><button class="btn sm ghost block" data-act="logout">Đăng xuất</button>
+  <section class="card stack"><button class="btn sm ghost block" data-act="terms">⚖️ Điều khoản & lưu ý</button><button class="btn sm ghost block" data-act="logout">Đăng xuất</button>
   ${UI.confirm === 'delFam' ? `<div class="demo stack">Xóa vĩnh viễn gia đình này và toàn bộ tiến độ trên máy?<div class="row"><button class="btn sm" data-act="delFam">Xóa</button><button class="btn sm ghost" data-act="cancelConfirm">Hủy</button></div></div>` : '<button class="link tiny err" data-act="askDelFam">Xóa tài khoản gia đình trên máy này</button>'}</section>`;
 }
 function childSheet(cid) {
@@ -528,7 +569,11 @@ function donateBlock() {
     <img src="${DONATE.qr}" alt="Mã VietQR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" class="qr" loading="lazy">
     <div class="row between wrap"><div style="min-width:0"><b>${DONATE.name}</b><div class="tiny muted">${DONATE.bank} · <span class="num" style="user-select:all">${DONATE.acct}</span></div></div><button type="button" class="btn sm ghost" data-act="copyAcct">📋 Chép số tài khoản</button></div>
     <p class="tiny muted">Mở app ngân hàng bất kỳ, chọn quét mã VietQR / Napas 247.</p>
-    <p class="demo tiny">Mọi sự ủng hộ là hoàn toàn tự nguyện để duy trì và phát triển ứng dụng miễn phí, không đi kèm nghĩa vụ hay dịch vụ thương mại.</p>
+    <div class="demo tiny stack" style="gap:6px"><b>Lưu ý khi ủng hộ</b>
+      <span>• Hoàn toàn <b>tự nguyện</b>, là quà tặng cá nhân cho tác giả để duy trì ứng dụng; <b>không phải</b> thanh toán mua hàng, phí dịch vụ hay phí thành viên.</span>
+      <span>• Ứng dụng <b>luôn miễn phí đầy đủ</b> dù có ủng hộ hay không. Ủng hộ không kèm quyền lợi, ưu đãi hay nghĩa vụ nào giữa hai bên.</span>
+      <span>• Khoản ủng hộ <b>không hoàn lại</b>. Vui lòng kiểm tra đúng tên và số tài khoản, chỉ ủng hộ trong khả năng của mình.</span>
+      <span>• Học Toán Vui không bao giờ yêu cầu chuyển tiền để mở bài học. ${termsLink('Xem điều khoản')}</span></div>
   </section>`;
 }
 function spreadBlock() {
@@ -548,8 +593,8 @@ async function seedDemo() {
   p2.challenges.s1c1 = 3; p2.challenges.s1c2 = 2; p2.challenges.s1c3 = 3; p2.challenges.s1c4 = 3;
   BY_SEASON[2].slice(0, 3).forEach(l => { p2.lessons[l.id] = 2; });
   const wk = weekKey(), lwk = weekKey(addDays(new Date(), -7));
-  p2.ledger.push({ id: uid(), ts: Date.now() - 864e5 * 8, wk: lwk, n: 30, counted: 30, reason: 'Các bài Mùa 1', paid: true });
-  p2.ledger.push({ id: uid(), ts: Date.now() - 864e5, wk, n: 6, counted: 6, reason: 'Bài S02E01–S02E03', paid: false });
+  p2.ledger.push({ id: uid(), ts: Date.now() - 864e5 * 8, wk: lwk, n: 30, counted: 30, reason: 'Các bài Chặng 1', paid: true });
+  p2.ledger.push({ id: uid(), ts: Date.now() - 864e5, wk, n: 6, counted: 6, reason: 'Bài C2·B01–C2·B03', paid: false });
   p2.missions.s2e1 = { status: 'pending', ts: Date.now() - 36e5 }; p2.missions.s1e20 = { status: 'approved', ts: Date.now() - 864e5 * 2 };
   p2.log.push({ ts: Date.now() - 864e5, key: 's2e3', score: 6, total: 8, stars: 2 });
   p2.streak = { last: dayKey(addDays(new Date(), -1)), count: 4 }; p2.lastSeason = 2;
@@ -572,6 +617,8 @@ document.addEventListener('click', async e => {
   switch (a) {
     case 'go': go(d.v); break;
     case 'home': go('welcome'); break;
+    case 'terms': openTerms(); break;
+    case 'termsClose': { const m = document.getElementById('terms-modal'); if (m && (e.target === t || t.tagName === 'BUTTON')) m.remove(); break; }
     case 'speak': { const b = t.closest('.bubble'); if (b) say(b.innerHTML.replace(/<button[\s\S]*?<\/button>/g, '')); break; }
     case 'speakQ': say(UI.les.qs[UI.les.qi].q); break;
     case 'startReg': UI.err = ''; go('register'); break;
@@ -593,7 +640,7 @@ document.addEventListener('click', async e => {
     case 'season': UI.season = +d.s; render(); break;
     case 'openNode': {
       const s = +d.s, i = +d.i; const n = nodeStates(f, UI.cid, s)[i];
-      if (!n.open) { toast(seasonOpen(f, prog(f, UI.cid), s) ? 'Con học xong bài trước để mở bài này nhé!' : `Hoàn thành Mùa ${s - 1} để mở Mùa ${s} nhé!`); break; }
+      if (!n.open) { toast(seasonOpen(f, prog(f, UI.cid), s) ? 'Con học xong bài trước để mở bài này nhé!' : `Hoàn thành Chặng ${s - 1} để mở Chặng ${s} nhé!`); break; }
       UI.sheet = () => lessonSheet(s, i); render(); break;
     }
     case 'startNode': UI.sheet = null; startNode(+d.s, +d.i); break;
@@ -635,7 +682,7 @@ document.addEventListener('click', async e => {
       toast('Đã tải file sao lưu.'); break;
     }
     case 'copyAcct': try { await navigator.clipboard.writeText(DONATE.acct); toast('Đã chép số tài khoản.'); } catch (er) { toast('Số tài khoản: ' + DONATE.acct); } break;
-    case 'share': { const data = { title: 'Học Toán Vui', text: 'App học toán tư duy miễn phí cho bé theo chương trình Numberblocks', url: location.href.split('#')[0] }; try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(data.url); toast('Đã chép đường dẫn để chia sẻ.'); } } catch (er) { } break; }
+    case 'share': { const data = { title: 'Học Toán Vui', text: 'App học toán tư duy miễn phí cho bé: 120 bài, nhiệm vụ ở nhà, sao thưởng', url: location.href.split('#')[0] }; try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(data.url); toast('Đã chép đường dẫn để chia sẻ.'); } } catch (er) { } break; }
   }
 });
 document.addEventListener('change', async e => {
@@ -699,6 +746,7 @@ document.addEventListener('submit', async e => {
 function failed(msg) { UI.fails = (UI.fails || 0) + 1; if (UI.fails >= 5) { UI.lockUntil = Date.now() + 60000; UI.fails = 0; UI.err = 'Nhập sai 5 lần. Vui lòng thử lại sau 1 phút.'; setTimeout(render, 60500); } else UI.err = msg; render(); }
 document.addEventListener('keydown', e => {
   touch();
+  if (e.key === 'Escape' && document.getElementById('terms-modal')) { document.getElementById('terms-modal').remove(); return; }
   if (e.key === 'Escape' && UI.sheet) { UI.sheet = null; render(); }
   if (UI.view === 'pin' && /^[0-9]$/.test(e.key)) { const b = document.querySelector(`[data-act="key"][data-k="${e.key}"]`); b && b.click(); }
   if (UI.view === 'pin' && e.key === 'Backspace') { const b = document.querySelector('[data-act="key"][data-k="⌫"]'); b && b.click(); }

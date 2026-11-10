@@ -1,5 +1,5 @@
 /* Bộ nhớ đệm để app mở được khi mất mạng */
-const CACHE = 'htv-v3';
+const CACHE = 'htv-v4';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'assets/donate-qr.jpg', 'assets/icon.svg', 'assets/icon-192.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
