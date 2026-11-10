@@ -62,7 +62,10 @@ Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localSto
 
 ## Ủng hộ (donate)
 
-Ở màn **Ba mẹ đăng nhập** và tab **Tổng quan** có mã VietQR (MB Bank · TAO MINH HIEN · 141431319191), file `assets/donate-qr.jpg`.
+Ở màn **Ba mẹ đăng nhập** và tab **Tổng quan** có khối *"Tiếp lửa để Team Khủng Long Su thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕"* (MB Bank · TAO MINH HIEN · 141431319191):
+
+- Chọn mức **39k / 59k / 99k** (mã VietQR có sẵn số tiền, nội dung "Ung ho Hoc Toan Vui": `assets/donate-qr-39k.png`, `-59k`, `-99k`) hoặc **Tùy tâm** (mã gốc `assets/donate-qr.jpg`, ba mẹ tự nhập số tiền).
+- Nút **Tải mã QR về máy** để ba mẹ lưu ảnh rồi quét từ thư viện trong app ngân hàng.
 
 - Ủng hộ hoàn toàn **tự nguyện**, là quà tặng cá nhân để duy trì ứng dụng; **không phải** thanh toán mua hàng, phí dịch vụ hay phí thành viên.
 - Ứng dụng luôn miễn phí đầy đủ; ủng hộ không kèm quyền lợi, ưu đãi hay nghĩa vụ nào giữa hai bên, và không được hoàn lại.

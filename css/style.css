@@ -232,3 +232,4 @@ details summary{cursor:pointer;font-weight:800}
 .terms{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink-2)}.terms b{color:var(--ink)}
 .note{background:var(--surface-2);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
 .toggle.tiny{font-size:13.5px;align-items:flex-start}.toggle.tiny input{flex:none;margin-top:2px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.tiers .chip{min-width:0;font-size:16px;padding:10px 4px;text-align:center}.tiers .chip.on{background:var(--jade);border-color:var(--jade);color:#fff}

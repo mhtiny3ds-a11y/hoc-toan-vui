@@ -4,6 +4,15 @@
    ===================================================================== */
 const STAR = 1000, MAX_CAP = 50, LS_KEY = 'htv:v1', LOCK_MS = 10 * 60 * 1000;
 const DONATE = { name: 'TAO MINH HIEN', acct: '141431319191', bank: 'MB Bank', qr: 'assets/donate-qr.jpg' };
+/* Các mức ủng hộ: mã VietQR có sẵn số tiền (nội dung "Ung ho Hoc Toan Vui"); "Tùy tâm" dùng mã gốc không kèm số tiền */
+const DONATE_TIERS = [
+  { k: '39k', label: '39k', amount: 39000, qr: 'assets/donate-qr-39k.png' },
+  { k: '59k', label: '59k', amount: 59000, qr: 'assets/donate-qr-59k.png' },
+  { k: '99k', label: '99k', amount: 99000, qr: 'assets/donate-qr-99k.png' },
+  { k: 'tuy-tam', label: 'Tùy tâm', amount: 0, qr: 'assets/donate-qr.jpg' }
+];
+let donateTier = 'tuy-tam';
+const tierOf = k => DONATE_TIERS.find(t => t.k === k) || DONATE_TIERS[3];
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -563,12 +572,17 @@ function childSheet(cid) {
     ${c && f.children.length > 1 ? (UI.confirm === 'delChild' ? `<div class="demo stack">Xóa hồ sơ ${esc(c.name)} và toàn bộ tiến độ?<div class="row"><button type="button" class="btn sm" data-act="delChild" data-cid="${c.id}">Xóa</button><button type="button" class="btn sm ghost" data-act="cancelSheetConfirm">Hủy</button></div></div>` : `<button type="button" class="link tiny err" data-act="askDelChild">Xóa hồ sơ này</button>`) : ''}
   </form>`;
 }
+const donateAmtText = t => t.amount ? `Mã QR đã có sẵn số tiền <b>${vnd(t.amount)}</b>, ba mẹ chỉ cần xác nhận chuyển.` : 'Ba mẹ tự nhập số tiền tùy tâm sau khi quét mã.';
 function donateBlock() {
   return `<section class="card stack" aria-labelledby="donate-h">
-    <div class="row">${su('cheer', 52)}<h2 class="h3 grow" id="donate-h">Donate Su ly cafe cho tỉnh táo nếu ba mẹ thấy ổn nè ☕</h2></div>
-    <img src="${DONATE.qr}" alt="Mã VietQR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" class="qr" loading="lazy">
+    <div class="row">${su('cheer', 52)}<h2 class="h3 grow" id="donate-h">Tiếp lửa để Team Khủng Long Su thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕</h2></div>
+    <div class="chips tiers" role="radiogroup" aria-label="Chọn mức ủng hộ">${DONATE_TIERS.map(t => `<button type="button" class="chip ${t.k === donateTier ? 'on' : ''}" role="radio" aria-checked="${t.k === donateTier}" data-act="donateTier" data-k="${t.k}">${t.label}</button>`).join('')}</div>
+    <p class="tiny muted center" id="donate-amt">${donateAmtText(tierOf(donateTier))}</p>
+    <img src="${tierOf(donateTier).qr}" alt="Mã VietQR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" class="qr" id="donate-qr" loading="lazy">
+    <button type="button" class="btn sm jade block" data-act="saveQr">⬇️ Tải mã QR về máy</button>
+    <p class="tiny muted center" style="margin-top:-6px">Tải ảnh về rồi mở app ngân hàng → Quét QR → chọn ảnh từ thư viện.</p>
     <div class="row between wrap"><div style="min-width:0"><b>${DONATE.name}</b><div class="tiny muted">${DONATE.bank} · <span class="num" style="user-select:all">${DONATE.acct}</span></div></div><button type="button" class="btn sm ghost" data-act="copyAcct">📋 Chép số tài khoản</button></div>
-    <p class="tiny muted">Mở app ngân hàng bất kỳ, chọn quét mã VietQR / Napas 247.</p>
+    <p class="tiny muted">Hoặc quét trực tiếp bằng app ngân hàng bất kỳ (VietQR / Napas 247).</p>
     <div class="demo tiny stack" style="gap:6px"><b>Lưu ý khi ủng hộ</b>
       <span>• Hoàn toàn <b>tự nguyện</b>, là quà tặng cá nhân cho tác giả để duy trì ứng dụng; <b>không phải</b> thanh toán mua hàng, phí dịch vụ hay phí thành viên.</span>
       <span>• Ứng dụng <b>luôn miễn phí đầy đủ</b> dù có ủng hộ hay không. Ủng hộ không kèm quyền lợi, ưu đãi hay nghĩa vụ nào giữa hai bên.</span>
@@ -680,6 +694,25 @@ document.addEventListener('click', async e => {
       const blob = new Blob([JSON.stringify({ app: 'hoc-toan-vui', v: 1, at: new Date().toISOString(), family: f }, null, 1)], { type: 'application/json' });
       const url = URL.createObjectURL(blob); const lnk = document.createElement('a'); lnk.href = url; lnk.download = `hoc-toan-vui-${(f.user || 'gia-dinh').replace(/[^a-z0-9]/gi, '')}-${dayKey()}.json`; document.body.appendChild(lnk); lnk.click(); lnk.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
       toast('Đã tải file sao lưu.'); break;
+    }
+    case 'donateTier': {
+      donateTier = d.k; const tr = tierOf(d.k);
+      // chỉ đổi ảnh, không vẽ lại trang để giữ nguyên dữ liệu ba mẹ đang nhập
+      const sec = t.closest('section');
+      sec.querySelectorAll('[data-act=donateTier]').forEach(b => { const on = b.dataset.k === d.k; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+      sec.querySelector('#donate-qr').src = tr.qr; sec.querySelector('#donate-amt').innerHTML = donateAmtText(tr);
+      break;
+    }
+    case 'saveQr': {
+      const tr = tierOf(donateTier), ext = tr.qr.split('.').pop(), name = `ung-ho-hoc-toan-vui-${tr.k}.${ext}`;
+      try {
+        const blob = await (await fetch(tr.qr)).blob(); const file = new File([blob], name, { type: blob.type });
+        // điện thoại: mở bảng chia sẻ để "Lưu hình ảnh"; máy tính: tải file xuống
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Mã QR ủng hộ Học Toán Vui' }); break; }
+        const url = URL.createObjectURL(blob); const a2 = document.createElement('a'); a2.href = url; a2.download = name; document.body.appendChild(a2); a2.click(); a2.remove(); setTimeout(() => URL.revokeObjectURL(url), 3000);
+        toast('Đã tải mã QR. Mở app ngân hàng để quét từ ảnh nhé!');
+      } catch (er) { if (er && er.name === 'AbortError') break; const a2 = document.createElement('a'); a2.href = tr.qr; a2.download = name; a2.target = '_blank'; document.body.appendChild(a2); a2.click(); a2.remove(); }
+      break;
     }
     case 'copyAcct': try { await navigator.clipboard.writeText(DONATE.acct); toast('Đã chép số tài khoản.'); } catch (er) { toast('Số tài khoản: ' + DONATE.acct); } break;
     case 'share': { const data = { title: 'Học Toán Vui', text: 'App học toán tư duy miễn phí cho bé: 120 bài, nhiệm vụ ở nhà, sao thưởng', url: location.href.split('#')[0] }; try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(data.url); toast('Đã chép đường dẫn để chia sẻ.'); } } catch (er) { } break; }
