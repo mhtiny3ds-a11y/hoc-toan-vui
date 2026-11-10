@@ -1,8 +1,8 @@
 # Học Toán Vui
 
-Web app học toán tư duy **miễn phí** cho bé, đi theo đúng thứ tự **120 tập Numberblocks (Mùa 1 → Mùa 6)** trong thư mục Google Drive của gia đình. App không cần máy chủ và chạy được ngay trên GitHub Pages. Phong cách giao diện tham khảo Lumi English.
+Web app học toán tư duy **miễn phí, phi thương mại** cho bé: **6 chặng, 120 bài** từ đếm số đến bảng nhân. App không cần máy chủ và chạy được ngay trên GitHub Pages. Phong cách giao diện tham khảo Lumi English.
 
-> Học Toán Vui là ứng dụng độc lập, không phải sản phẩm chính thức của Numberblocks, Blue Zoo, Alphablocks Ltd hay BBC. Các nhân vật Su, Bi, Xu và toàn bộ nội dung luyện tập do app tự biên soạn.
+> Học Toán Vui là ứng dụng độc lập. Toàn bộ bài giảng, câu hỏi, hình minh họa, nhiệm vụ và nhân vật (Su, Bi, Xu) do Học Toán Vui tự biên soạn từ kiến thức toán phổ thông. Ứng dụng không liên kết, không được tài trợ hay bảo trợ bởi bất kỳ chương trình, thương hiệu, nhà xuất bản hay tổ chức giáo dục nào. Xem đầy đủ trong mục **Điều khoản & lưu ý** của app.
 
 ## Nhân vật
 
@@ -14,7 +14,7 @@ Web app học toán tư duy **miễn phí** cho bé, đi theo đúng thứ tự 
 
 ## Chương trình học
 
-| Mùa | Thế giới | Số bài | Nội dung |
+| Chặng | Thế giới | Số bài | Nội dung |
 |---|---|---|---|
 | 1 | ⛰️ Đồi Số Đếm | 20 | Số 0–5, đếm, gộp, tách, so sánh |
 | 2 | 🌈 Thung Lũng Phép Cộng | 30 | Số 6–10, cộng, trừ, chẵn lẻ, gấp đôi, bạn của 10 |
@@ -23,15 +23,15 @@ Web app học toán tư duy **miễn phí** cho bé, đi theo đúng thứ tự 
 | 5 | 🗼 Tháp Trăm Nghìn | 5 | Số 60–1000, hàng trăm, hàng nghìn |
 | 6 | 🚀 Vũ Trụ Phép Nhân | 30 | Bảng nhân, thừa số, số nguyên tố, số vuông, bậc thang |
 
-Mỗi bài tương ứng **một tập** (ví dụ S01E01) và gồm:
+Mỗi bài (ví dụ C1·B01 = Chặng 1, Bài 1) gồm:
 
 1. **Học**: 3 trang Su giảng bằng hình minh họa (khối, tia số, mảng, bậc thang, khối 3D…). Su có thể đọc to bằng giọng tiếng Việt của máy.
 2. **Luyện tập**: 8 câu sinh ngẫu nhiên nên mỗi lần học lại sẽ khác. App có hơn 50 dạng bài như đếm, xếp khối, nhìn nhanh, tách số, so sánh, chẵn lẻ, đếm cách, chục–đơn vị, nhân, chia, toán có lời văn…
-3. **Nhiệm vụ ở nhà**: một hoạt động thực tế, có bài kèm phiếu in trong Drive.
+3. **Nhiệm vụ ở nhà**: một hoạt động thực tế với đồ vật quen thuộc trong nhà.
 
-Sau mỗi 5 bài có một **Thử thách** ôn tập gồm 10 câu. Các bài mở lần lượt theo thứ tự, và mùa sau chỉ mở khi con xong mùa trước. Ba mẹ có thể bật "Mở khóa toàn bộ".
+Sau mỗi 5 bài có một **Thử thách** ôn tập gồm 10 câu. Các bài mở lần lượt theo thứ tự, và chặng sau chỉ mở khi con xong chặng trước. Ba mẹ có thể bật "Mở khóa toàn bộ".
 
-Nội dung nằm trong `js/curriculum.js`, mỗi tập một dòng. Dạng bài và hình minh họa được định nghĩa trong `js/engine.js`.
+Nội dung nằm trong `js/curriculum.js`, mỗi bài một dòng. Dạng bài và hình minh họa được định nghĩa trong `js/engine.js`.
 
 ## Đồng hành cùng con
 
@@ -60,9 +60,25 @@ App nhắc ba mẹ ở màn chào, bản đồ học, trang bài học, màn k�
 
 Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localStorage). Để chuyển sang máy khác, vào **Tài khoản → Tải file sao lưu**, rồi trên máy mới chọn **Khôi phục từ file sao lưu**.
 
-## Donate
+## Ủng hộ (donate)
 
 Ở màn **Ba mẹ đăng nhập** và tab **Tổng quan** có mã VietQR (MB Bank · TAO MINH HIEN · 141431319191), file `assets/donate-qr.jpg`.
+
+- Ủng hộ hoàn toàn **tự nguyện**, là quà tặng cá nhân để duy trì ứng dụng; **không phải** thanh toán mua hàng, phí dịch vụ hay phí thành viên.
+- Ứng dụng luôn miễn phí đầy đủ; ủng hộ không kèm quyền lợi, ưu đãi hay nghĩa vụ nào giữa hai bên, và không được hoàn lại.
+
+## Điều khoản & lưu ý
+
+Trang **Điều khoản & lưu ý** trong app (mở từ màn chào, form đăng ký, khối ủng hộ, Ví thưởng và tab Tài khoản) nêu rõ:
+
+- **Nội dung bài học**: tự biên soạn từ kiến thức toán phổ thông, chỉ để tham khảo và ôn luyện tại nhà, không thay thế chương trình chính thức, không cam kết kết quả; có kênh liên hệ để gỡ/sửa nội dung nếu ai đó cho rằng ảnh hưởng đến quyền của họ.
+- **Sao thưởng**: là công cụ khích lệ trong gia đình; quy đổi 1 sao = 1.000đ chỉ là gợi ý; app không giữ, không chuyển, không thanh toán tiền; sao không có giá trị quy đổi.
+- **Ủng hộ**: như mục trên.
+- **Dữ liệu**: chỉ lưu trên máy, không thu thập hay gửi đi; ba mẹ tự sao lưu.
+- **Trẻ em**: tài khoản do ba mẹ tạo, trẻ học dưới sự đồng hành của ba mẹ.
+- **Miễn trừ trách nhiệm**: ứng dụng cung cấp "nguyên trạng".
+
+Khi tạo tài khoản, ba mẹ phải tích ô xác nhận đã đọc và đồng ý điều khoản.
 
 ## Chạy và đưa lên GitHub Pages
 
@@ -75,7 +91,7 @@ Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localSto
 ```
 index.html            khung trang
 css/style.css         giao diện (sáng/tối)
-js/curriculum.js      120 bài học và link phiếu in trên Drive
+js/curriculum.js      120 bài học
 js/engine.js          hình minh họa + bộ sinh câu hỏi
 js/mascots.js         nhân vật Su, Bi, Xu (SVG)
 js/app.js             tài khoản, bản đồ, bài học, sao thưởng, khu vực ba mẹ
