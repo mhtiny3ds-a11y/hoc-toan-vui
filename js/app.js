@@ -4,15 +4,15 @@
    ===================================================================== */
 const STAR = 1000, MAX_CAP = 50, LS_KEY = 'htv:v1', LOCK_MS = 10 * 60 * 1000;
 const DONATE = { name: 'TAO MINH HIEN', acct: '141431319191', bank: 'MB Bank', qr: 'assets/donate-qr.jpg' };
-/* Các mức ủng hộ: mã VietQR có sẵn số tiền (nội dung "Ung ho Hoc Toan Vui"); "Tùy tâm" dùng mã gốc không kèm số tiền */
+/* Các mức "mời Su ly cà phê": mã VietQR có sẵn số tiền, nội dung chuyển khoản "Thank you Su".
+   Giao diện chỉ hiện tên loại cà phê, không hiện số tiền. */
 const DONATE_TIERS = [
-  { k: '39k', label: '39k', amount: 39000, qr: 'assets/donate-qr-39k.png' },
-  { k: '59k', label: '59k', amount: 59000, qr: 'assets/donate-qr-59k.png' },
-  { k: '99k', label: '99k', amount: 99000, qr: 'assets/donate-qr-99k.png' },
-  { k: 'tuy-tam', label: 'Tùy tâm', amount: 0, qr: 'assets/donate-qr.jpg' }
+  { k: 'sua-da', label: '🧊 Sữa đá', qr: 'assets/donate-qr-sua-da.png' },
+  { k: 'latte', label: '☕ Latte', qr: 'assets/donate-qr-latte.png' },
+  { k: 'ca-phe-muoi', label: '🧂 Cà phê Muối', qr: 'assets/donate-qr-ca-phe-muoi.png' }
 ];
-let donateTier = 'tuy-tam';
-const tierOf = k => DONATE_TIERS.find(t => t.k === k) || DONATE_TIERS[3];
+let donateTier = 'latte';
+const tierOf = k => DONATE_TIERS.find(t => t.k === k) || DONATE_TIERS[1];
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -572,11 +572,11 @@ function childSheet(cid) {
     ${c && f.children.length > 1 ? (UI.confirm === 'delChild' ? `<div class="demo stack">Xóa hồ sơ ${esc(c.name)} và toàn bộ tiến độ?<div class="row"><button type="button" class="btn sm" data-act="delChild" data-cid="${c.id}">Xóa</button><button type="button" class="btn sm ghost" data-act="cancelSheetConfirm">Hủy</button></div></div>` : `<button type="button" class="link tiny err" data-act="askDelChild">Xóa hồ sơ này</button>`) : ''}
   </form>`;
 }
-const donateAmtText = t => t.amount ? `Mã QR đã có sẵn số tiền <b>${vnd(t.amount)}</b>, ba mẹ chỉ cần xác nhận chuyển.` : 'Ba mẹ tự nhập số tiền tùy tâm sau khi quét mã.';
+const donateAmtText = t => `Ba mẹ mời Su ly <b>${t.label.replace(/^\S+ /, '')}</b> nhé! Nội dung chuyển khoản: <b>Thank you Su</b>.`;
 function donateBlock() {
   return `<section class="card stack" aria-labelledby="donate-h">
-    <div class="row">${su('cheer', 52)}<h2 class="h3 grow" id="donate-h">Tiếp lửa để Team Khủng Long Su thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕</h2></div>
-    <div class="chips tiers" role="radiogroup" aria-label="Chọn mức ủng hộ">${DONATE_TIERS.map(t => `<button type="button" class="chip ${t.k === donateTier ? 'on' : ''}" role="radio" aria-checked="${t.k === donateTier}" data-act="donateTier" data-k="${t.k}">${t.label}</button>`).join('')}</div>
+    <div class="row">${su('cheer', 52)}<h2 class="h3 grow" id="donate-h">Mời ly Coffee để Khủng long Su có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕</h2></div>
+    <div class="chips tiers" role="radiogroup" aria-label="Chọn loại cà phê">${DONATE_TIERS.map(t => `<button type="button" class="chip ${t.k === donateTier ? 'on' : ''}" role="radio" aria-checked="${t.k === donateTier}" data-act="donateTier" data-k="${t.k}">${t.label}</button>`).join('')}</div>
     <p class="tiny muted center" id="donate-amt">${donateAmtText(tierOf(donateTier))}</p>
     <img src="${tierOf(donateTier).qr}" alt="Mã VietQR ủng hộ: ${DONATE.name}, ${DONATE.bank}, số tài khoản ${DONATE.acct}" class="qr" id="donate-qr" loading="lazy">
     <button type="button" class="btn sm jade block" data-act="saveQr">⬇️ Tải mã QR về máy</button>
