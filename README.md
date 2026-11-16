@@ -29,7 +29,9 @@ Mỗi bài (ví dụ C1·B01 = Chặng 1, Bài 1) gồm:
 2. **Luyện tập**: 8 câu sinh ngẫu nhiên nên mỗi lần học lại sẽ khác. App có hơn 50 dạng bài như đếm, xếp khối, nhìn nhanh, tách số, so sánh, chẵn lẻ, đếm cách, chục–đơn vị, nhân, chia, toán có lời văn…
 3. **Nhiệm vụ ở nhà**: một hoạt động thực tế với đồ vật quen thuộc trong nhà.
 
-Sau mỗi 5 bài có một **Thử thách** ôn tập gồm 10 câu. Các bài mở lần lượt theo thứ tự, và chặng sau chỉ mở khi con xong chặng trước. Ba mẹ có thể bật "Mở khóa toàn bộ".
+Sau mỗi 5 bài có một **Thử thách** ôn tập gồm 10 câu. Các bài mở lần lượt theo thứ tự, và chặng sau chỉ mở khi con xong chặng trước.
+
+**Mở khóa theo trình độ:** trong Khu vực ba mẹ (tab Tổng quan hoặc Tài khoản → 🔓 Mở khóa bài theo trình độ), ba mẹ chọn riêng cho từng con: tích từng bài, mở cả chặng, hoặc mở toàn bộ 120 bài. Bài được mở có biểu tượng 🔑 trên bản đồ và trở thành bài "Học tiếp"; các bài sau đó tự mở dần khi con học xong. Bỏ tích để khóa lại, kết quả bài con đã học vẫn giữ. Ngoài ra vẫn có công tắc "Mở khóa toàn bộ bài học cho tất cả các con".
 
 Nội dung nằm trong `js/curriculum.js`, mỗi bài một dòng. Dạng bài và hình minh họa được định nghĩa trong `js/engine.js`.
 
@@ -49,7 +51,7 @@ App nhắc ba mẹ ở màn chào, bản đồ học, trang bài học, màn k�
 
 - **Ba mẹ** đăng nhập bằng số điện thoại/email và mật khẩu. Khi tạo tài khoản, ba mẹ đặt thêm một **mã PIN ba mẹ** (4 số).
 - **Con** chọn hình đại diện rồi nhập **mã PIN 4 số** riêng. Một gia đình có thể có nhiều con.
-- Khu vực ba mẹ gồm 4 tab: Tổng quan (tiến độ, gợi ý ôn tập), Duyệt nhiệm vụ, Ví thưởng, Tài khoản (thêm/sửa con, giới hạn sao, mở khóa bài, đổi mật khẩu, sao lưu/khôi phục).
+- Khu vực ba mẹ gồm 4 tab: Tổng quan (tiến độ, gợi ý ôn tập), Duyệt nhiệm vụ, Ví thưởng, Tài khoản (thêm/sửa con, giới hạn sao, mở khóa bài theo trình độ từng con, đổi mật khẩu, sao lưu/khôi phục).
 - Khu vực ba mẹ **tự khóa** sau 10 phút không thao tác hoặc khi mở lại app. Muốn mở lại phải nhập mật khẩu hoặc PIN ba mẹ.
 - Quên mật khẩu: dùng mã PIN ba mẹ để đặt lại. Nếu nhập sai 5 lần, app khóa 1 phút.
 - Mật khẩu và mã PIN được băm SHA-256 trước khi lưu.
