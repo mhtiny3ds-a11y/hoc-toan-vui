@@ -63,15 +63,22 @@ function nodesOf(s) {
 }
 const nodeBest = (p, n) => n.type === 'lesson' ? (p.lessons[n.key] || 0) : (p.challenges[n.key] || 0);
 const seasonDone = (p, s) => nodesOf(s).every(n => nodeBest(p, n) > 0);
-const seasonOpen = (f, p, s) => s == 1 || f.unlockAll || seasonDone(p, s - 1);
+const seasonOpen = (f, p, s) => s == 1 || f.unlockAll || p.unlockAll || seasonDone(p, s - 1);
+/* ba mẹ mở khóa riêng từng bài cho từng con (p.unlocked[key] = true); các bài sau bài được mở sẽ tự mở dần khi con học xong */
+const isUnlocked = (p, key) => !!(p.unlocked && p.unlocked[key]);
+const seasonAccessible = (f, p, s) => seasonOpen(f, p, s) || nodesOf(s).some(n => isUnlocked(p, n.key));
 function nodeStates(f, cid, s) {
-  const p = prog(f, cid), list = nodesOf(s), sOpen = seasonOpen(f, p, s); let curSet = false;
-  return list.map((n, i) => {
-    const best = nodeBest(p, n), done = best > 0;
-    const open = f.unlockAll || (sOpen && (i === 0 || nodeBest(p, list[i - 1]) > 0));
-    let current = false; if (open && !done && !curSet) { current = true; curSet = true; }
-    return { ...n, i, best, done, open, current };
+  const p = prog(f, cid), list = nodesOf(s), sOpen = seasonOpen(f, p, s);
+  const st = list.map((n, i) => {
+    const best = nodeBest(p, n), done = best > 0, byParent = isUnlocked(p, n.key);
+    const open = f.unlockAll || p.unlockAll || byParent || (i > 0 && nodeBest(p, list[i - 1]) > 0) || (i === 0 && sOpen);
+    return { ...n, i, best, done, open, byParent, current: false };
   });
+  // "Học tiếp": bài mở chưa học, ưu tiên từ bài ba mẹ mở gần nhất trở đi
+  let from = 0; st.forEach((n, i) => { if (n.byParent) from = i; });
+  const cur = st.find((n, i) => i >= from && n.open && !n.done) || st.find(n => n.open && !n.done);
+  if (cur) cur.current = true;
+  return st;
 }
 const lessonsDone = p => Object.values(p.lessons).filter(v => v > 0).length;
 function currentSeason(f, cid) { const p = prog(f, cid); for (let s = 1; s <= 6; s++) if (!seasonDone(p, s)) return s; return 6; }
@@ -117,7 +124,10 @@ function render() {
   const views = { welcome: vWelcome, parentLogin: vParentLogin, forgot: vForgot, register: vRegister, family: vFamilyFind, profiles: vProfiles, pin: vPin, child: vChild, parent: vParent, parentLock: vParentLock, lesson: vLesson, result: vResult, about: vAbout };
   html = (views[v] || vWelcome)();
   app.className = (v === 'child' || v === 'parent') ? '' : 'bare';
+  // giữ vị trí cuộn trong bảng nổi (ví dụ danh sách mở khóa bài) khi vẽ lại
+  const keepScroll = [...app.querySelectorAll('.sheet, .ulist')].map(el => el.scrollTop);
   app.innerHTML = html + (UI.sheet ? `<div class="scrim" data-act="closeSheet"><div class="sheet" data-stop="1" role="dialog" aria-modal="true">${UI.sheet()}</div></div>` : '') + (UI.toast ? `<div class="toast" role="status">${esc(UI.toast)}</div>` : '');
+  if (UI.sheet) app.querySelectorAll('.sheet, .ulist').forEach((el, i) => { if (keepScroll[i]) el.scrollTop = keepScroll[i]; });
   const af = app.querySelector('[autofocus]'); if (af && !('ontouchstart' in window)) af.focus();
   afterRender();
 }
@@ -278,7 +288,7 @@ function vChild() {
 }
 function vLearn(f, c, p, s) {
   const S = SEASONS[s], states = nodeStates(f, c.id, s), done = states.filter(x => x.done).length, cur = states.find(x => x.current);
-  const sOpen = seasonOpen(f, p, s);
+  const sOpen = seasonAccessible(f, p, s);
   const xs = [0, 52, 78, 52, 0, -52, -78, -52];
   const today = p.log.filter(l => dayKey(new Date(l.ts)) === dayKey()).length;
   let path = '';
@@ -286,13 +296,13 @@ function vLearn(f, c, p, s) {
     const x = xs[i % xs.length];
     const cls = ['node', n.type === 'challenge' ? 'chal' : '', !n.open ? 'locked' : '', n.current ? 'current' : '', n.done ? 'done' : ''].join(' ');
     const ic = !n.open ? '🔒' : n.type === 'lesson' ? n.l.icon : '🏆';
-    const lab = n.type === 'lesson' ? `${n.l.e}. ${esc(n.l.vi)}` : `Thử thách ${n.k}`;
+    const lab = (n.byParent && !n.done ? '🔑 ' : '') + (n.type === 'lesson' ? `${n.l.e}. ${esc(n.l.vi)}` : `Thử thách ${n.k}`);
     path += `<button class="${cls}" style="--x:${x};--c:${S.c}" data-act="openNode" data-s="${s}" data-i="${i}" aria-label="${lab}${n.open ? '' : ' (đang khóa)'}">
       <span class="disc">${n.current ? '<span class="here">Học tiếp</span>' : ''}<span class="em">${ic}</span></span>
       <span class="lbl">${lab}</span>${n.best ? `<span class="st">${'★'.repeat(n.best)}${'☆'.repeat(3 - n.best)}</span>` : ''}</button>`;
   });
   const hello = !sOpen ? `Chặng ${s} sẽ mở khi con hoàn thành <b>Chặng ${s - 1}</b> nhé!` : cur ? (cur.type === 'lesson' ? `Hôm nay mình học <b>Bài ${cur.l.e}: ${esc(cur.l.vi)}</b> nhé!` : `Đến <b>Thử thách ${cur.k}</b> rồi! Ôn lại 5 bài vừa học.`) : `Con đã xong cả <b>${S.name}</b>! Giỏi quá!`;
-  return `<div class="seasonbar" role="tablist">${[1, 2, 3, 4, 5, 6].map(k => `<button class="chip ${k == s ? 'on' : ''}" style="--c:${SEASONS[k].c}" data-act="season" data-s="${k}" role="tab" aria-selected="${k == s}">${seasonOpen(f, p, k) ? '' : '🔒 '}Chặng ${k}</button>`).join('')}</div>
+  return `<div class="seasonbar" role="tablist">${[1, 2, 3, 4, 5, 6].map(k => `<button class="chip ${k == s ? 'on' : ''}" style="--c:${SEASONS[k].c}" data-act="season" data-s="${k}" role="tab" aria-selected="${k == s}">${seasonAccessible(f, p, k) ? '' : '🔒 '}Chặng ${k}</button>`).join('')}</div>
   <section class="world" style="--c:${S.c}"><div><span class="eyebrow">Chặng ${s} · ${BY_SEASON[s].length} bài</span><h2 class="h2">${S.icon} ${S.name}</h2><p class="tiny">${S.sub}</p></div>
     <div class="meter"><i style="width:${Math.round(done / states.length * 100)}%"></i></div><span class="tiny"><b>${done}/${states.length}</b> chặng · hôm nay ${today} bài</span></section>
   ${sayBox(su(sOpen ? 'happy' : 'think', 60, 'bob'), hello)}
@@ -499,6 +509,7 @@ function vPHome(f) {
       <div class="kpis"><div><b>${ld}</b><span>/120 bài</span></div><div><b>${ws}</b><span>/${capOf(f)} sao tuần</span></div><div><b>${vnd(unpaid(f, c.id) * STAR)}</b><span>chưa trao</span></div></div>
       <div><span class="tiny muted">Đang học: <b>Chặng ${s} · ${SEASONS[s].name}</b></span><div class="meter"><i style="width:${Math.round(ld / 120 * 100)}%"></i></div></div>
       ${insightFor(f, c).map(t => `<p class="tip">💡 ${esc(t)}</p>`).join('')}
+      <button class="btn sm ghost block" data-act="unlockOpen" data-cid="${c.id}">🔓 Mở khóa bài theo trình độ của ${esc(c.name)}</button>
       ${recent.length ? `<div class="ledger">${recent.map(r => { const l = LESSON[r.key]; return `<div class="li"><span>${l ? l.icon : '🏆'}</span><span class="tx">${l ? `${l.code} · ${esc(l.vi)}` : 'Thử thách ' + esc(r.key)}<small>${new Date(r.ts).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric' })} · đúng ${r.score}/${r.total}</small></span><span class="n">${'★'.repeat(r.stars) || '–'}</span></div>`; }).join('')}</div>` : ''}
     </section>`;
   }).join('')}
@@ -542,10 +553,13 @@ function vPAccount(f) {
   return `<h2 class="h3">Các con</h2>
   <div class="stack">${f.children.map(c => `<button class="choice" data-act="editChild" data-cid="${c.id}">${ava(c.avatar, 'sm')}<span><b>${esc(c.name)}</b><span class="muted tiny">Sửa tên, hình, mã PIN</span></span></button>`).join('')}
   <button class="choice" data-act="editChild" data-cid=""><span class="ic" style="background:var(--jade-soft)">➕</span><span><b>Thêm con</b><span class="muted tiny">Mỗi con một hồ sơ và mã PIN riêng</span></span></button></div>
+  <h2 class="h3">Mở khóa bài theo trình độ</h2>
+  <section class="card stack"><p class="tiny muted">Con đã biết đếm, biết cộng? Ba mẹ chọn đúng bài phù hợp để con học ngay, không cần làm lại từ đầu. Mỗi con mở khóa riêng.</p>
+  ${f.children.map(c => { const n = Object.keys(prog(f, c.id).unlocked || {}).length, all = prog(f, c.id).unlockAll; return `<button class="choice" data-act="unlockOpen" data-cid="${c.id}">${ava(c.avatar, 'sm')}<span><b>${esc(c.name)}</b><span class="muted tiny">${all ? 'Đã mở toàn bộ 120 bài' : n ? `Ba mẹ đã mở ${n} bài` : 'Chưa mở thêm bài nào'}</span></span></button>`; }).join('')}</section>
   <h2 class="h3">Cài đặt học tập</h2>
   <form class="card stack" data-form="settings">
     <div class="field"><label>Giới hạn sao mỗi tuần (tối đa 50 sao = 50.000đ)</label><select name="cap">${[10, 15, 20, 25, 30, 35, 40, 45, 50].map(n => `<option value="${n}" ${capOf(f) === n ? 'selected' : ''}>${n} sao · ${vnd(n * STAR)}</option>`).join('')}</select></div>
-    <label class="toggle"><input type="checkbox" name="unlock" ${f.unlockAll ? 'checked' : ''}><span>Mở khóa toàn bộ bài học (con vào bài bất kỳ)</span></label>
+    <label class="toggle"><input type="checkbox" name="unlock" ${f.unlockAll ? 'checked' : ''}><span>Mở khóa toàn bộ bài học cho tất cả các con</span></label>
     <button class="btn sm block">Lưu cài đặt</button>
   </form>
   <h2 class="h3">Bảo mật</h2>
@@ -561,6 +575,23 @@ function vPAccount(f) {
     <label class="btn sm ghost block">📂 Khôi phục từ file<input type="file" accept="application/json,.json" data-act="restore" hidden></label></section>
   <section class="card stack"><button class="btn sm ghost block" data-act="terms">⚖️ Điều khoản & lưu ý</button><button class="btn sm ghost block" data-act="logout">Đăng xuất</button>
   ${UI.confirm === 'delFam' ? `<div class="demo stack">Xóa vĩnh viễn gia đình này và toàn bộ tiến độ trên máy?<div class="row"><button class="btn sm" data-act="delFam">Xóa</button><button class="btn sm ghost" data-act="cancelConfirm">Hủy</button></div></div>` : '<button class="link tiny err" data-act="askDelFam">Xóa tài khoản gia đình trên máy này</button>'}</section>`;
+}
+function unlockSheet(cid) {
+  const f = fam(), c = childOf(f, cid); if (!c) return '';
+  const p = prog(f, cid), s = UI.uSeason || currentSeason(f, cid), st = nodeStates(f, cid, s);
+  const nU = st.filter(n => n.byParent).length;
+  return `<div class="stack"><div class="row">${ava(c.avatar, 'sm')}<div class="grow"><span class="eyebrow">Mở khóa bài cho ${esc(c.name)}</span><h2 class="h3">Chọn bài phù hợp trình độ</h2></div><button type="button" class="x" data-act="closeSheetBtn" aria-label="Đóng">✕</button></div>
+    <p class="tiny muted">Tích vào bài muốn mở. Con vào học được ngay bài đó; các bài tiếp theo tự mở dần khi con học xong. Bỏ tích để khóa lại (bài con đã học vẫn giữ kết quả).</p>
+    <label class="toggle"><input type="checkbox" data-act="unlockAllChild" data-cid="${cid}" ${p.unlockAll ? 'checked' : ''}><span>Mở toàn bộ 120 bài cho ${esc(c.name)}</span></label>
+    <div class="seasonbar">${[1, 2, 3, 4, 5, 6].map(k => `<button type="button" class="chip ${k == s ? 'on' : ''}" style="--c:${SEASONS[k].c}" data-act="uSeason" data-s="${k}">Chặng ${k}</button>`).join('')}</div>
+    <div class="row between wrap"><b>${SEASONS[s].icon} ${SEASONS[s].name}</b><span class="row" style="gap:6px"><button type="button" class="btn sm jade" data-act="unlockSeason" data-cid="${cid}" data-s="${s}" data-on="1">Mở cả chặng</button>${nU ? `<button type="button" class="btn sm ghost" data-act="unlockSeason" data-cid="${cid}" data-s="${s}" data-on="0">Khóa lại</button>` : ''}</span></div>
+    <div class="ulist">${st.map(n => {
+      const lab = n.type === 'lesson' ? `${n.l.icon} ${n.l.e}. ${esc(n.l.vi)}` : `🏆 Thử thách ${n.k}`;
+      const sub = n.type === 'lesson' ? esc(n.l.goal) : 'Ôn tập 5 bài trước';
+      const state = n.done ? `<span class="pill jade">${'★'.repeat(n.best)}</span>` : (n.open && !n.byParent) ? '<span class="pill">Đã mở</span>' : '';
+      return `<label class="uitem ${n.byParent ? 'on' : ''}"><input type="checkbox" data-act="unlockLesson" data-cid="${cid}" data-key="${n.key}" ${n.byParent || p.unlockAll || f.unlockAll ? 'checked' : ''} ${p.unlockAll || f.unlockAll ? 'disabled' : ''}><span class="grow"><b>${lab}</b><small>${sub}</small></span>${state}</label>`;
+    }).join('')}</div>
+    <button type="button" class="btn block" data-act="closeSheetBtn">Xong</button></div>`;
 }
 function childSheet(cid) {
   const f = fam(), c = childOf(f, cid);
@@ -654,7 +685,7 @@ document.addEventListener('click', async e => {
     case 'season': UI.season = +d.s; render(); break;
     case 'openNode': {
       const s = +d.s, i = +d.i; const n = nodeStates(f, UI.cid, s)[i];
-      if (!n.open) { toast(seasonOpen(f, prog(f, UI.cid), s) ? 'Con học xong bài trước để mở bài này nhé!' : `Hoàn thành Chặng ${s - 1} để mở Chặng ${s} nhé!`); break; }
+      if (!n.open) { toast(seasonAccessible(f, prog(f, UI.cid), s) ? 'Con học xong bài trước (hoặc nhờ ba mẹ mở khóa) để vào bài này nhé!' : `Hoàn thành Chặng ${s - 1} để mở Chặng ${s} nhé!`); break; }
       UI.sheet = () => lessonSheet(s, i); render(); break;
     }
     case 'startNode': UI.sheet = null; startNode(+d.s, +d.i); break;
@@ -683,6 +714,15 @@ document.addEventListener('click', async e => {
     case 'payAsk': UI.confirm = 'pay:' + d.cid; render(); break;
     case 'cancelConfirm': UI.confirm = null; render(); break;
     case 'pay': { const p = prog(f, d.cid); const up = unpaid(f, d.cid); p.ledger.forEach(x => x.paid = true); f.payouts ||= []; f.payouts.push({ ts: Date.now(), cid: d.cid, amount: up * STAR, stars: up }); UI.confirm = null; save(); toast(`Đã ghi sổ trao ${vnd(up * STAR)}.`); break; }
+    case 'unlockOpen': UI.uSeason = null; UI.sheet = () => unlockSheet(d.cid); render(); break;
+    case 'uSeason': { UI.uSeason = +d.s; render(); const ul = $('.ulist'); if (ul) ul.scrollTop = 0; break; }
+    case 'closeSheetBtn': UI.sheet = null; render(); break;
+    case 'unlockSeason': {
+      const p = prog(f, d.cid); p.unlocked ||= {};
+      nodesOf(+d.s).forEach(n => { if (d.on === '1') p.unlocked[n.key] = true; else delete p.unlocked[n.key]; });
+      if (d.on === '1') p.lastSeason = +d.s;
+      save(); toast(d.on === '1' ? `Đã mở cả Chặng ${d.s} cho ${childOf(f, d.cid).name}.` : `Đã khóa lại các bài ba mẹ mở ở Chặng ${d.s}.`); break;
+    }
     case 'editChild': UI.confirm = null; UI.sheet = () => childSheet(d.cid); render(); break;
     case 'askDelChild': UI.confirm = 'delChild'; render(); break;
     case 'cancelSheetConfirm': UI.confirm = null; render(); break;
@@ -722,6 +762,12 @@ document.addEventListener('change', async e => {
   touch();
   const t = e.target;
   if (t.dataset.act === 'toggleSpeak') { const f = fam(); prog(f, UI.cid).speak = t.checked; save(); return; }
+  if (t.dataset.act === 'unlockLesson' || t.dataset.act === 'unlockAllChild') {
+    const f = fam(), p = prog(f, t.dataset.cid);
+    if (t.dataset.act === 'unlockAllChild') p.unlockAll = t.checked;
+    else { p.unlocked ||= {}; if (t.checked) { p.unlocked[t.dataset.key] = true; const n = LESSON[t.dataset.key]; p.lastSeason = n ? n.s : +t.dataset.key.match(/^s(\d)/)[1]; } else delete p.unlocked[t.dataset.key]; }
+    save(); render(); return;
+  }
   if (t.dataset.act === 'restore' && t.files[0]) {
     try {
       const data = JSON.parse(await t.files[0].text()); const F = data.family;
