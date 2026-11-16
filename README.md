@@ -62,9 +62,9 @@ Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localSto
 
 ## Ủng hộ (donate)
 
-Ở màn **Ba mẹ đăng nhập** và tab **Tổng quan** có khối *"Tiếp lửa để Team Khủng Long Su thêm động lực đồng hành và phát triển cùng con nha ba mẹ ☕"* (MB Bank · TAO MINH HIEN · 141431319191):
+Ở màn **Ba mẹ đăng nhập** và tab **Tổng quan** có khối *"Mời ly Coffee để Khủng long Su có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕"* (MB Bank · TAO MINH HIEN · 141431319191):
 
-- Chọn mức **39k / 59k / 99k** (mã VietQR có sẵn số tiền, nội dung "Ung ho Hoc Toan Vui": `assets/donate-qr-39k.png`, `-59k`, `-99k`) hoặc **Tùy tâm** (mã gốc `assets/donate-qr.jpg`, ba mẹ tự nhập số tiền).
+- 3 lựa chọn, giao diện chỉ hiện tên loại cà phê: **🧊 Sữa đá** (40.000đ), **☕ Latte** (56.000đ), **🧂 Cà phê Muối** (66.000đ). Mỗi mã VietQR có sẵn số tiền và nội dung chuyển khoản **"Thank you Su"** (`assets/donate-qr-sua-da.png`, `-latte`, `-ca-phe-muoi`). Mã gốc `assets/donate-qr.jpg` (không kèm số tiền) vẫn được giữ trong repo.
 - Nút **Tải mã QR về máy** để ba mẹ lưu ảnh rồi quét từ thư viện trong app ngân hàng.
 
 - Ủng hộ hoàn toàn **tự nguyện**, là quà tặng cá nhân để duy trì ứng dụng; **không phải** thanh toán mua hàng, phí dịch vụ hay phí thành viên.
