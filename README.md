@@ -60,6 +60,8 @@ App nhắc ba mẹ ở màn chào, bản đồ học, trang bài học, màn k�
 
 ## Dữ liệu
 
+App **không gọi tới máy chủ bên ngoài nào**: font chữ Baloo 2 và Nunito được lưu sẵn trong `assets/fonts/` (giấy phép SIL Open Font License, kèm file `OFL-*.txt`), nên địa chỉ IP của người dùng không bị gửi tới Google Fonts. Mã QR, hình ảnh và nhân vật cũng đều nằm trong repo.
+
 Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localStorage). Để chuyển sang máy khác, vào **Tài khoản → Tải file sao lưu**, rồi trên máy mới chọn **Khôi phục từ file sao lưu**.
 
 ## Ủng hộ (donate)
