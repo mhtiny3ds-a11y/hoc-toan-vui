@@ -3,7 +3,7 @@
    Dữ liệu lưu trong trình duyệt (localStorage), không cần máy chủ.
    ===================================================================== */
 const STAR = 1000, MAX_CAP = 50, LS_KEY = 'htv:v1', LOCK_MS = 10 * 60 * 1000;
-const DONATE = { name: 'TAO MINH HIEN', acct: '141431319191', bank: 'MB Bank', qr: 'assets/donate-qr.jpg' };
+const DONATE = { name: 'TAO MINH HIEN', acct: '141431319191', bank: 'MB Bank' };
 /* Các mức "mời Su ly cà phê": mã VietQR có sẵn số tiền, nội dung chuyển khoản "Thank you Su".
    Giao diện chỉ hiện tên loại cà phê, không hiện số tiền. */
 const DONATE_TIERS = [
@@ -81,6 +81,19 @@ function nodeStates(f, cid, s) {
   return st;
 }
 const lessonsDone = p => Object.values(p.lessons).filter(v => v > 0).length;
+/* ---- thú cưng: lớn theo số bài + thử thách đã hoàn thành, mỗi lần học xong được ăn một bữa ---- */
+const challengesDone = p => Object.values(p.challenges).filter(v => v > 0).length;
+const petProgress = p => lessonsDone(p) + challengesDone(p);
+const petFedToday = p => (p.pet && p.pet.fedDay === dayKey()) ? p.pet.fedN : 0;
+function feedPet(p) {
+  if (!p.pet) return null;
+  const food = PET_FOOD[Math.floor(Math.random() * PET_FOOD.length)];
+  p.pet.meals = (p.pet.meals || 0) + 1;
+  if (p.pet.fedDay === dayKey()) p.pet.fedN++; else { p.pet.fedDay = dayKey(); p.pet.fedN = 1; }
+  return food;
+}
+/* Donate chỉ hiện khi ít nhất một bé đã hoàn thành 3 bài học */
+const showDonate = f => (f ? [f] : Object.values(STORE.families)).some(F => (F.children || []).some(c => lessonsDone(prog(F, c.id)) >= 3));
 function currentSeason(f, cid) { const p = prog(f, cid); for (let s = 1; s <= 6; s++) if (!seasonDone(p, s)) return s; return 6; }
 function badgesOf(f, cid) {
   const p = prog(f, cid), ld = lessonsDone(p), st = streakNow(p), ms = Object.values(p.missions).filter(m => m.status === 'approved').length;
@@ -213,7 +226,7 @@ function vParentLogin() {
     <div class="row between"><button type="button" class="link" data-act="go" data-v="forgot">Quên mật khẩu?</button><button type="button" class="link" data-act="startReg">Tạo tài khoản</button></div>
   </form>
   ${restoreBlock()}
-  ${donateBlock()}`;
+  ${showDonate() ? donateBlock() : ''}`;
 }
 function vForgot() {
   return `<div class="row">${backBtn('go', 'data-v="parentLogin"')}<h1 class="h2">Đặt lại mật khẩu</h1></div>
@@ -281,9 +294,10 @@ function vChild() {
   if (UI.tab === 'learn') body = vLearn(f, c, p, s);
   else if (UI.tab === 'missions') body = vMissions(f, c, p);
   else if (UI.tab === 'rewards') body = vRewards(f, c, p);
+  else if (UI.tab === 'pet') body = vPet(f, c, p);
   else body = vMe(f, c, p);
   const pending = Object.values(p.missions).filter(m => m.status === 'pending').length;
-  const tabs = [['learn', '🗺️', 'Học'], ['missions', '🐝', 'Nhiệm vụ'], ['rewards', '🐷', 'Hũ sao'], ['me', esc(c.avatar), 'Của con']];
+  const tabs = [['learn', '🗺️', 'Học'], ['missions', '🐝', 'Nhiệm vụ'], ['pet', p.pet ? petSvg(p.pet.kind, petStageOf(petProgress(p)), 'happy', 30, '', true) : '🥚', 'Thú cưng'], ['rewards', '🐷', 'Hũ sao'], ['me', esc(c.avatar), 'Của con']];
   return top + body + `<nav class="tabbar" aria-label="Điều hướng"><div class="in">${tabs.map(([k, i, t]) => `<button class="tab ${UI.tab === k ? 'on' : ''}" data-act="tab" data-t="${k}" ${UI.tab === k ? 'aria-current="page"' : ''}><span class="i">${i}</span>${t}${k === 'missions' && pending ? ` <span class="badge-n">${pending}</span>` : ''}</button>`).join('')}</div></nav>`;
 }
 function vLearn(f, c, p, s) {
@@ -341,6 +355,43 @@ function vRewards(f, c, p) {
   <div class="badges">${badgesOf(f, c.id).map(b => `<div class="badge ${b.on ? '' : 'off'}"><span class="b">${b.i}</span>${esc(b.t)}</div>`).join('')}</div>
   <h2 class="h3">Sao gần đây</h2>
   <section class="card ledger">${recent.length ? recent.map(e => `<div class="li"><span>⭐</span><span class="tx">${esc(e.reason)}<small>${new Date(e.ts).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })}${e.counted < e.n ? ` · ${e.n - e.counted} sao vượt mức tuần, không tính tiền` : ''}</small></span><span class="n">+${e.counted}</span></div>`).join('') : '<p class="muted">Chưa có sao nào. Học bài đầu tiên để nhận sao nhé!</p>'}</section>`;
+}
+function vPet(f, c, p) {
+  const prg = petProgress(p), st = petStageOf(prg);
+  if (!p.pet || UI.petEdit) {
+    const sel = UI.petPick || (p.pet && p.pet.kind) || 'rong';
+    const nm = UI.petName != null ? UI.petName : (p.pet ? p.pet.name : PET_KINDS[sel].name);
+    return `${sayBox(su('happy', 56), p.pet ? `Con muốn đổi tên hay đổi bạn khác? Bạn mới vẫn giữ nguyên cấp độ con đã nuôi nhé!` : `Con chọn một bạn thú cưng để nuôi nhé! Mỗi bài con học xong, bạn ấy được <b>ăn một bữa</b> và <b>lớn dần lên</b> theo hành trình học của con.`)}
+    <form class="stack" data-form="pet">
+      <div class="petpick">${Object.entries(PET_KINDS).map(([k, K]) => `<button type="button" class="petopt ${k === sel ? 'on' : ''}" data-act="petPick" data-k="${k}" aria-pressed="${k === sel}">${petSvg(k, 3, 'happy', 92)}<b>${K.name}</b><small>${K.desc}</small></button>`).join('')}</div>
+      <div class="field"><label for="petname">Đặt tên cho bạn ấy</label><input id="petname" name="name" maxlength="16" value="${esc(nm)}" placeholder="VD: Bé Lửa"></div>
+      <button class="btn block">${p.pet ? 'Lưu thay đổi' : '🥚 Nhận nuôi bạn này'}</button>
+      ${p.pet ? '<button type="button" class="btn ghost block" data-act="petCancel">Hủy</button>' : ''}
+    </form>`;
+  }
+  const K = PET_KINDS[p.pet.kind], fed = petFedToday(p), S = PET_STAGES[st], next = PET_STAGES[st + 1];
+  const pct = next ? Math.round((prg - S.min) / (next.min - S.min) * 100) : 100;
+  return `${sayBox(petSvg(p.pet.kind, st, fed ? 'happy' : 'sleepy', 60, '', true), fed ? `<b>${esc(p.pet.name)}:</b> Hôm nay tớ được ăn <b>${fed} bữa</b> rồi, no căng bụng! Cảm ơn ${esc(c.name)} đã chăm chỉ học bài nha 💛` : `<b>${esc(p.pet.name)}:</b> Tớ đói bụng quá… ${esc(c.name)} học một bài để tớ được ăn nhé!`)}
+  <section class="card pethome" style="--pc:${K.c1}">
+    <div class="petstage">${petSvg(p.pet.kind, st, fed ? 'happy' : 'sleepy', 220, 'bob')}</div>
+    <h2 class="h2 center">${esc(p.pet.name)}</h2>
+    <div class="row center wrap" style="gap:6px"><span class="pill">${K.name}</span><span class="pill gold">${S.name}</span><span class="pill jade">Cấp ${prg + 1}</span></div>
+    ${next ? `<div class="meter"><i style="width:${pct}%;background:var(--pc)"></i></div><p class="tiny muted center">Học thêm <b>${next.min - prg}</b> bài nữa để ${esc(p.pet.name)} lớn thành <b>${next.name}</b></p>` : `<p class="center"><b>🎉 ${esc(p.pet.name)} đã trở thành Huyền thoại!</b></p>`}
+  </section>
+  <h2 class="h3">Hành trình lớn lên</h2>
+  <div class="petpath">${PET_STAGES.map((X, i) => `<div class="pp ${i <= st ? 'on' : ''} ${i === st ? 'cur' : ''}">${petSvg(p.pet.kind, i, 'happy', 76)}<b>${X.name}</b><small>${i === 0 ? 'Bắt đầu' : `${X.min} bài`}</small></div>`).join('')}</div>
+  <div class="stats"><div class="card"><b>${p.pet.meals || 0}</b><span>bữa đã ăn</span></div><div class="card"><b>${fed}</b><span>bữa hôm nay</span></div><div class="card"><b>${prg}</b><span>bài & thử thách</span></div></div>
+  <section class="card stack"><p class="tiny muted">🍎 <b>Cách nuôi:</b> mỗi bài học hoặc thử thách con làm xong, ${esc(p.pet.name)} được ăn một bữa. Con hoàn thành càng nhiều bài mới, bạn ấy càng lớn và đổi hình dáng: có thêm sừng, cánh, mây bông, áo choàng, rồi đội vương miện Huyền thoại!</p>
+    <button class="btn sm ghost" data-act="petEdit">✏️ Đổi tên / đổi bạn</button></section>`;
+}
+function petResultBlock(R, c, p) {
+  if (!p.pet) return `<section class="card petfeed"><div class="row">${petSvg('rong', 0, 'happy', 70, 'wobble')}<div class="grow"><b>Có một quả trứng đang chờ con!</b><p class="tiny muted">Chọn một bạn thú cưng để nuôi. Mỗi bài con học xong, bạn ấy được ăn và lớn lên.</p></div></div><button class="btn sm gold block" data-act="toPet">🥚 Chọn thú cưng</button></section>`;
+  const P = R.pet; if (!P) return '';
+  const up = P.after > P.before;
+  return `<section class="card petfeed ${up ? 'levelup' : ''}"><div class="feedrow"><div class="petbox">${petSvg(p.pet.kind, P.after, 'cheer', 104, up ? 'grow' : 'bob', true)}<span class="food" aria-hidden="true">${P.food}</span></div>
+    <div class="bubble grow"><b>${esc(p.pet.name)}:</b> Măm măm, ${P.food} ngon quá! Cảm ơn ${esc(c.name)} đã chăm chỉ học bài để nuôi tớ lớn nha! 💛</div></div>
+    ${up ? `<p class="lvup">🎉 ${esc(p.pet.name)} đã lớn thành <b>${PET_STAGES[P.after].name}</b>!</p>` : ''}
+    <button class="link tiny" data-act="toPet">Thăm ${esc(p.pet.name)} →</button></section>`;
 }
 function vMe(f, c, p) {
   return `<section class="card mecard">${ava(c.avatar, 'lg')}<div><h2 class="h2">${esc(c.name)}</h2><p class="tiny muted">Gia đình ${esc(f.parentName)}</p></div></section>
@@ -427,7 +478,7 @@ function finishLesson() {
   const n = L.qs.length, ratio = L.correct / n;
   const stars = ratio >= .85 ? 3 : ratio >= .6 ? 2 : ratio >= .35 ? 1 : 0;
   const book = L.kind === 'lesson' ? p.lessons : p.challenges;
-  const prev = book[L.key] || 0;
+  const prev = book[L.key] || 0, petBefore = petStageOf(petProgress(p));
   let res = { n: 0, counted: 0, over: 0 };
   if (stars > prev) {
     book[L.key] = stars;
@@ -438,11 +489,12 @@ function finishLesson() {
   if (p.log.length > 400) p.log = p.log.slice(-400);
   if (stars > 0) bumpStreak(p);
   p.lastSeason = L.s;
+  const food = feedPet(p), pet = food ? { food, before: petBefore, after: petStageOf(petProgress(p)) } : null;
   save();
-  UI.result = { stars, prev, correct: L.correct, n, res, kind: L.kind, l: L.l, k: L.k, s: L.s };
+  UI.result = { stars, prev, correct: L.correct, n, res, kind: L.kind, l: L.l, k: L.k, s: L.s, pet };
   beep(stars ? 'win' : 'bad');
   go('result');
-  if (p.speak !== false) say(stars ? `Con được ${stars} sao!` : 'Mình thử lại nhé!');
+  if (p.speak !== false) say((stars ? `Con được ${stars} sao!` : 'Mình thử lại nhé!') + (pet ? ` ${p.pet.name} cảm ơn con đã chăm chỉ học bài!` : ''));
 }
 function vResult() {
   const R = UI.result; if (!R) return vChild();
@@ -460,6 +512,7 @@ function vResult() {
       ${over ? `<p class="tiny muted">${over} sao vượt mức ${capOf(f)} sao/tuần nên không tính tiền, nhưng vẫn được ghi nhận.</p>` : ''}
       <div class="row between"><span>Hũ sao tuần này</span><b>${weekStars(f, c.id)}/${capOf(f)}</b></div>
     </section>
+    ${petResultBlock(R, c, prog(f, c.id))}
     ${remindBox()}
     ${R.kind === 'lesson' && R.stars ? sayBox(bi('happy', 52), `Nhiệm vụ ở nhà: ${esc(R.l.mission)} <b>(+2 sao)</b>`, false) : ''}
     <div class="stack">
@@ -508,12 +561,13 @@ function vPHome(f) {
     return `<section class="card stack"><div class="row">${ava(c.avatar, 'sm')}<b class="h3 grow">${esc(c.name)}</b><span class="statpill">🔥 ${streakNow(p)}</span></div>
       <div class="kpis"><div><b>${ld}</b><span>/120 bài</span></div><div><b>${ws}</b><span>/${capOf(f)} sao tuần</span></div><div><b>${vnd(unpaid(f, c.id) * STAR)}</b><span>chưa trao</span></div></div>
       <div><span class="tiny muted">Đang học: <b>Chặng ${s} · ${SEASONS[s].name}</b></span><div class="meter"><i style="width:${Math.round(ld / 120 * 100)}%"></i></div></div>
+      ${p.pet ? `<p class="tiny">🐾 Thú cưng: <b>${esc(p.pet.name)}</b> (${PET_KINDS[p.pet.kind].name}) · ${PET_STAGES[petStageOf(petProgress(p))].name} · Cấp ${petProgress(p) + 1} · đã ăn ${p.pet.meals || 0} bữa</p>` : `<p class="tiny muted">🐾 ${esc(c.name)} chưa chọn thú cưng.</p>`}
       ${insightFor(f, c).map(t => `<p class="tip">💡 ${esc(t)}</p>`).join('')}
       <button class="btn sm ghost block" data-act="unlockOpen" data-cid="${c.id}">🔓 Mở khóa bài theo trình độ của ${esc(c.name)}</button>
       ${recent.length ? `<div class="ledger">${recent.map(r => { const l = LESSON[r.key]; return `<div class="li"><span>${l ? l.icon : '🏆'}</span><span class="tx">${l ? `${l.code} · ${esc(l.vi)}` : 'Thử thách ' + esc(r.key)}<small>${new Date(r.ts).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric' })} · đúng ${r.score}/${r.total}</small></span><span class="n">${'★'.repeat(r.stars) || '–'}</span></div>`; }).join('')}</div>` : ''}
     </section>`;
   }).join('')}
-  ${spreadBlock()}${donateBlock()}`;
+  ${spreadBlock()}${showDonate(f) ? donateBlock() : ''}`;
 }
 function vPApprove(f) {
   const list = [];
@@ -643,6 +697,7 @@ async function seedDemo() {
   p2.missions.s2e1 = { status: 'pending', ts: Date.now() - 36e5 }; p2.missions.s1e20 = { status: 'approved', ts: Date.now() - 864e5 * 2 };
   p2.log.push({ ts: Date.now() - 864e5, key: 's2e3', score: 6, total: 8, stars: 2 });
   p2.streak = { last: dayKey(addDays(new Date(), -1)), count: 4 }; p2.lastSeason = 2;
+  p2.pet = { kind: 'rong', name: 'Lửa Nhỏ', meals: 31, fedDay: dayKey(addDays(new Date(), -1)), fedN: 2 };
   f.payouts.push({ ts: Date.now() - 864e5 * 3, cid: 'c2', amount: 30000, stars: 30 });
   STORE.dev.familyId = id; save();
 }
@@ -723,6 +778,10 @@ document.addEventListener('click', async e => {
       if (d.on === '1') p.lastSeason = +d.s;
       save(); toast(d.on === '1' ? `Đã mở cả Chặng ${d.s} cho ${childOf(f, d.cid).name}.` : `Đã khóa lại các bài ba mẹ mở ở Chặng ${d.s}.`); break;
     }
+    case 'toPet': UI.tab = 'pet'; UI.petEdit = false; go('child'); break;
+    case 'petPick': { const inp = $('#petname'), v = inp ? inp.value.trim() : ''; UI.petName = v && !Object.values(PET_KINDS).some(K => K.name === v) ? v : null; UI.petPick = d.k; render(); break; }
+    case 'petEdit': UI.petEdit = true; UI.petPick = null; UI.petName = null; render(); window.scrollTo(0, 0); break;
+    case 'petCancel': UI.petEdit = false; UI.petPick = null; UI.petName = null; render(); break;
     case 'editChild': UI.confirm = null; UI.sheet = () => childSheet(d.cid); render(); break;
     case 'askDelChild': UI.confirm = 'delChild'; render(); break;
     case 'cancelSheetConfirm': UI.confirm = null; render(); break;
@@ -815,6 +874,11 @@ document.addEventListener('submit', async e => {
     if (fd.ppin && !/^\d{4}$/.test(fd.ppin)) { UI.err = 'Mã PIN gồm đúng 4 chữ số.'; return render(); }
     if (fd.p) f.pw = await hashPw(fd.p); if (fd.ppin) f.ppin = await hashPw('pin:' + fd.ppin);
     UI.err = ''; save(); form.reset(); toast('Đã cập nhật bảo mật.');
+  } else if (k === 'pet') {
+    const p = prog(f, UI.cid), kind = UI.petPick || (p.pet && p.pet.kind) || 'rong', isNew = !p.pet;
+    p.pet = Object.assign(p.pet || { meals: 0 }, { kind, name: (fd.name || '').trim() || PET_KINDS[kind].name });
+    UI.petEdit = false; UI.petPick = null; UI.petName = null; save();
+    toast(isNew ? `Chào ${p.pet.name}! Học một bài để cho bạn ấy ăn nhé 🥚` : 'Đã lưu thú cưng.');
   } else if (k === 'child') {
     const cid = form.dataset.cid; if (fd.pin && !/^\d{4}$/.test(fd.pin)) return toast('Mã PIN gồm đúng 4 chữ số.');
     if (cid) { const c = childOf(f, cid); c.name = fd.n.trim(); c.avatar = fd.a || c.avatar; if (fd.pin) c.pin = await hashPw('pin:' + fd.pin); }

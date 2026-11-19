@@ -39,6 +39,15 @@ Nội dung nằm trong `js/curriculum.js`, mỗi bài một dòng. Dạng bài v
 
 App nhắc ba mẹ ở màn chào, bản đồ học, trang bài học, màn kết quả và khu vực ba mẹ: *"Ba mẹ ơi, dành 10 phút mỗi ngày đồng hành cùng Su và con nhé"*.
 
+## Thú cưng
+
+Ngoài hũ sao, mỗi con chọn nuôi một bạn ở tab **Thú cưng**: **Rồng Lửa**, **Mèo Mây** hoặc **Cún Sao**, và tự đặt tên.
+
+- Mỗi bài học hoặc thử thách con làm xong, thú cưng được **ăn một bữa** và cảm ơn con đã chăm chỉ học bài.
+- Thú cưng **lớn lên theo lộ trình học** (số bài + thử thách đã hoàn thành): Quả trứng → Em bé (1) → Nhóc con (8) → Thiếu niên (25) → Trưởng thành (55) → Huyền thoại (95). Mỗi giai đoạn to hơn và đổi hình dáng: sừng, cánh, mây bông, vòng sao, áo choàng, vương miện. Cấp = số bài đã hoàn thành + 1.
+- Ngày chưa học, thú cưng ngủ gật và nhắc con học bài. Đổi tên hoặc đổi loài vẫn giữ nguyên cấp.
+- Hình thú cưng vẽ bằng SVG trong `js/pets.js`.
+
 ## Sao thưởng
 
 - Mỗi sao = **1.000đ**. Tối đa **50 sao/tuần** (50.000đ). Ba mẹ có thể hạ giới hạn xuống 10–45 sao.
@@ -68,8 +77,9 @@ Toàn bộ dữ liệu lưu trong **trình duyệt của từng máy** (localSto
 
 Ở màn **Ba mẹ đăng nhập** và tab **Tổng quan** có khối *"Mời ly Coffee để Khủng long Su có thêm sức mạnh đồng hành và phát triển cùng các con nha ba mẹ ☕"* (MB Bank · TAO MINH HIEN · 141431319191):
 
-- 3 lựa chọn, giao diện chỉ hiện tên loại cà phê: **🧊 Sữa đá** (40.000đ), **☕ Latte** (56.000đ), **🧂 Cà phê Muối** (66.000đ). Mỗi mã VietQR có sẵn số tiền và nội dung chuyển khoản **"Thank you Su"** (`assets/donate-qr-sua-da.png`, `-latte`, `-ca-phe-muoi`). Mã gốc `assets/donate-qr.jpg` (không kèm số tiền) vẫn được giữ trong repo.
+- 3 lựa chọn, giao diện chỉ hiện tên loại cà phê: **🧊 Sữa đá** (40.000đ), **☕ Latte** (56.000đ), **🧂 Cà phê Muối** (66.000đ). Mỗi mã VietQR có sẵn số tiền và nội dung chuyển khoản **"Thank you Su"** (`assets/donate-qr-sua-da.png`, `-latte`, `-ca-phe-muoi`).
 - Nút **Tải mã QR về máy** để ba mẹ lưu ảnh rồi quét từ thư viện trong app ngân hàng.
+- Khối ủng hộ **chỉ hiện khi ít nhất một bé đã hoàn thành 3 bài học** (tính trên các gia đình lưu trong máy).
 
 - Ủng hộ hoàn toàn **tự nguyện**, là quà tặng cá nhân để duy trì ứng dụng; **không phải** thanh toán mua hàng, phí dịch vụ hay phí thành viên.
 - Ứng dụng luôn miễn phí đầy đủ; ủng hộ không kèm quyền lợi, ưu đãi hay nghĩa vụ nào giữa hai bên, và không được hoàn lại.
